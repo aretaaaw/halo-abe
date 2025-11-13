@@ -59,61 +59,55 @@
 
     /* Motivation full background */
     .motivation-bg {
-  position: relative;
-  height: 100vh;
-  width: 100%;
-  background: url("/public/motivasi.jpeg") center center/cover no-repeat;
-  
-  /* Flexbox untuk center konten */
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* Vertikal center */
-  align-items: center;     /* Horizontal center */
-  text-align: center;
-  color: white;
-}
+      position: relative;
+      height: 100vh;
+      width: 100%;
+      background: url("/public/motivasi.jpeg") center center/cover no-repeat;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: white;
+    }
+    .motivation-bg h2,
+    .motivation-bg p,
+    .motivation-bg button {
+      position: relative;
+      z-index: 2;
+      margin: 0.5rem 0;
+    }
+    #shuffleBtn {
+      background: rgba(255,255,255,0.9);
+      color: #333;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.3s;
+      align-self: center;
+    }
 
-.motivation-bg h2,
-.motivation-bg p,
-.motivation-bg button {
-  position: relative;
-  z-index: 2;
-  margin: 0.5rem 0; /* beri jarak antar elemen */
-}
-
-#shuffleBtn {
-  background: rgba(255,255,255,0.9);
-  color: #333;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 25px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: 0.3s;
-
-  /* Center button, sudah otomatis karena flex di parent */
-  align-self: center;
-}
-/* Finance boxes */
-  #financeResult {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 15px;
-    padding-left: 0;
-  }
-
-  #financeResult li {
-    list-style: none;
-    background: #c8f4e5;
-    padding: 15px 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    flex: 1 1 150px; /* lebar minimal, fleksibel */
-    text-align: center;
-    font-weight: bold;
-    color: #2b4a42;
-  }
+    /* Finance boxes */
+    #financeResult {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+      padding-left: 0;
+    }
+    #financeResult li {
+      list-style: none;
+      background: #c8f4e5;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      flex: 1 1 150px;
+      text-align: center;
+      font-weight: bold;
+      color: #2b4a42;
+    }
   </style>
 </head>
 <body>
@@ -248,8 +242,21 @@
         <h2>Habit</h2>
         <div class="card">
           <h3>Stress Management</h3>
-          <div class="form-group"><label>Alasan</label><textarea id="sReason"></textarea></div>
-          <div class="form-group"><label>Tingkat Stress</label><input type="number" id="sLevel" min="1" max="10"/></div>
+          <div class="form-group">
+            <label>Alasan</label>
+            <textarea id="sReason" placeholder="Contoh: Tugas sekolah"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Tingkat Stress</label>
+            <div class="stars" id="stressStars">
+              <span data-v="1">★</span>
+              <span data-v="2">★</span>
+              <span data-v="3">★</span>
+              <span data-v="4">★</span>
+              <span data-v="5">★</span>
+              <span data-v="6">★</span>
+            </div>
+          </div>
           <button id="solveStress">Dapatkan Solusi</button>
           <p id="sResult"></p>
         </div>`;
@@ -264,7 +271,7 @@
           "Kerja kerasmu akan terbayar.",
           "Tidak apa-apa istirahat, asal jangan menyerah.",
           "Setiap hari adalah kesempatan baru.",
-          " Jangan bandingkan perjalananmu dengan orang lain; setiap orang punya waktunya sendiri untuk bersinar.",
+          "Jangan bandingkan perjalananmu dengan orang lain; setiap orang punya waktunya sendiri untuk bersinar.",
         ];
         const motext = document.getElementById("motext");
         const shuffleBtn = document.getElementById("shuffleBtn");
@@ -314,11 +321,10 @@
             const li = document.createElement("li");
             const d = new Date(t.deadline);
             if (d < new Date(today.getFullYear(), today.getMonth(), today.getDate())) li.classList.add("overdue");
-            li.innerHTML = `
-              <div>
-                <input type="checkbox" data-index="${i}" />
-                <strong>${t.name}</strong> — ${t.mapel} (★${t.rating})<br><small>${t.deadline}</small>
-              </div>`;
+            li.innerHTML = `<div>
+              <input type="checkbox" data-index="${i}" />
+              <strong>${t.name}</strong> — ${t.mapel} (★${t.rating})<br><small>${t.deadline}</small>
+            </div>`;
             list.appendChild(li);
           });
 
@@ -411,14 +417,24 @@
       },
 
       habit() {
-        document.getElementById("solveStress").onclick = () => {
+        const stars = document.querySelectorAll("#stressStars span");
+        let stressLevel = 0;
+        stars.forEach(star=>{
+          star.addEventListener("click",()=>{
+            stressLevel = star.dataset.v;
+            stars.forEach(s=>s.classList.toggle("active", s.dataset.v <= stressLevel));
+          });
+        });
+
+        document.getElementById("solveStress").onclick = ()=>{
           const reason = document.getElementById("sReason").value.trim();
-          const level = Number(document.getElementById("sLevel").value);
-          if (!reason || !level) return alert("Isi alasan dan tingkat stress!");
+          if(!reason || !stressLevel) return alert("Pilih alasan dan tingkat stress!");
           let msg = "";
-          if (level <= 3) msg = "Kamu baik-baik saja, pertahankan!";
-          else if (level <= 6) msg = "Ambil napas dalam, istirahat sebentar.";
-          else msg = "Segera rehat, ceritakan pada teman atau guru BK.";
+          const lvl = Number(stressLevel);
+          if(lvl<=2) msg="Kamu baik-baik saja bang, pertahankan!";
+          else if(lvl<=4) msg="Coba tarik napas dalam dan relaks sebentar.";
+          else if(lvl<=6) msg=`Istirahat sejenak dan bicarakan masalah ${reason} dengan teman atau guru.`;
+          else msg=`Segera rehat, cari bantuan profesional terkait ${reason}.`;
           document.getElementById("sResult").textContent = msg;
         };
       },
