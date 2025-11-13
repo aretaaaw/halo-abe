@@ -237,30 +237,77 @@
         <ul id="financeResult"></ul>`;
     }
 
-    function habitPage() {
-      return `
-        <h2>Habit</h2>
-        <div class="card">
-          <h3>Stress Management</h3>
-          <div class="form-group">
-            <label>Alasan</label>
-            <textarea id="sReason" placeholder="Contoh: Tugas sekolah"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Tingkat Stress</label>
-            <div class="stars" id="stressStars">
-              <span data-v="1">★</span>
-              <span data-v="2">★</span>
-              <span data-v="3">★</span>
-              <span data-v="4">★</span>
-              <span data-v="5">★</span>
-              <span data-v="6">★</span>
-            </div>
-          </div>
-          <button id="solveStress">Dapatkan Solusi</button>
-          <p id="sResult"></p>
-        </div>`;
-    }
+ function habitPage() {
+  return `
+    <h2>Habit</h2>
+
+    <div class="card">
+      <h3>Stress Management</h3>
+      <div class="form-group">
+        <label>Alasan Stress</label>
+        <select id="sReason">
+          <option value="">Pilih alasan</option>
+          <option value="tugas">Tugas Sekolah</option>
+          <option value="bullying">Bullying</option>
+          <option value="ekonomi">Ekonomi</option>
+          <option value="keluarga">Keluarga</option>
+          <option value="teman">Teman</option>
+          <option value="lain">Yang Lain</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tingkat Stress</label>
+        <div class="stars" id="stressStars">
+          <span data-v="1">★</span>
+          <span data-v="2">★</span>
+          <span data-v="3">★</span>
+          <span data-v="4">★</span>
+          <span data-v="5">★</span>
+        </div>
+      </div>
+      <button id="solveStress">Dapatkan Solusi</button>
+      <p id="sResult"></p>
+    </div>
+
+    <div class="card">
+      <h3>Kalori Harian</h3>
+      <div class="form-group">
+        <label>Berat Badan (kg)</label>
+        <input id="weight" type="number" placeholder="Contoh: 60" />
+      </div>
+      <div class="form-group">
+        <label>Tinggi Badan (cm)</label>
+        <input id="height" type="number" placeholder="Contoh: 170" />
+      </div>
+      <div class="form-group">
+        <label>Usia</label>
+        <input id="age" type="number" placeholder="Contoh: 20" />
+      </div>
+      <div class="form-group">
+        <label>Jenis Kelamin</label>
+        <select id="gender">
+          <option value="">Pilih</option>
+          <option value="male">Laki-laki</option>
+          <option value="female">Perempuan</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Aktivitas Harian</label>
+        <select id="activity">
+          <option value="">Pilih</option>
+          <option value="1.2">Jarang bergerak</option>
+          <option value="1.375">Ringan (olahraga 1-2x/minggu)</option>
+          <option value="1.55">Sedang (olahraga 3-5x/minggu)</option>
+          <option value="1.725">Aktif (olahraga 6-7x/minggu)</option>
+          <option value="1.9">Sangat aktif (pekerjaan fisik berat)</option>
+        </select>
+      </div>
+      <button id="calcCalories">Hitung Kalori</button>
+      <p id="calResult"></p>
+    </div>
+  `;
+}
+
 
     const initFunctions = {
       motivation() {
@@ -416,28 +463,102 @@
         };
       },
 
-      habit() {
-        const stars = document.querySelectorAll("#stressStars span");
-        let stressLevel = 0;
-        stars.forEach(star=>{
-          star.addEventListener("click",()=>{
-            stressLevel = star.dataset.v;
-            stars.forEach(s=>s.classList.toggle("active", s.dataset.v <= stressLevel));
-          });
-        });
+ habit() {
+  // ⭐ Stress Management
+  const stars = document.querySelectorAll("#stressStars span");
+  let stressLevel = 0;
+  stars.forEach(star => {
+    star.addEventListener("click", () => {
+      stressLevel = star.dataset.v;
+      stars.forEach(s => s.classList.toggle("active", s.dataset.v <= stressLevel));
+    });
+  });
 
-        document.getElementById("solveStress").onclick = ()=>{
-          const reason = document.getElementById("sReason").value.trim();
-          if(!reason || !stressLevel) return alert("Pilih alasan dan tingkat stress!");
-          let msg = "";
-          const lvl = Number(stressLevel);
-          if(lvl<=2) msg="Kamu baik-baik saja, pertahankan!";
-          else if(lvl<=4) msg="Coba tarik napas dalam dan relaks sebentar.";
-          else if(lvl<=6) msg=`Istirahat sejenak dan bicarakan masalah ${reason} dengan teman atau guru.`;
-          else msg=`Segera rehat, cari bantuan profesional terkait ${reason}.`;
-          document.getElementById("sResult").textContent = msg;
-        };
-      },
+ document.getElementById("solveStress").onclick = () => {
+  const reason = document.getElementById("sReason").value;
+  if (!reason || !stressLevel) return alert("Pilih alasan dan tingkat stress!");
+
+  const lvl = Number(stressLevel);
+  let msg = "", kategori = "";
+
+  const solusi = {
+    tugas: {
+      rendah: "Atur waktu belajar, buat to-do list kecil. 🌿",
+      sedang: "Prioritaskan tugas penting, ambil jeda 10 menit antar tugas. 🌤️",
+      tinggi: "Minta bantuan guru atau teman, jangan pikul semuanya sendiri. 🔴",
+    },
+    bullying: {
+      rendah: "Abaikan komentar negatif dan tetap percaya diri. 🌿",
+      sedang: "Ceritakan pada teman yang bisa dipercaya. 🌤️",
+      tinggi: "Segera lapor guru/orang tua — kamu berhak merasa aman. 🔴",
+    },
+    ekonomi: {
+      rendah: "Catat pengeluaran, hemat dari hal kecil. 🌿",
+      sedang: "Diskusikan dengan keluarga untuk solusi bersama. 🌤️",
+      tinggi: "Cari bantuan sekolah/lembaga sosial, jangan hadapi sendiri. 🔴",
+    },
+    keluarga: {
+      rendah: "Luangkan waktu bersama tanpa gadget. 🌿",
+      sedang: "Bicarakan perasaanmu dengan tenang. 🌤️",
+      tinggi: "Minta bantuan guru BK atau konselor untuk menengahi. 🔴",
+    },
+    teman: {
+      rendah: "Tunggu suasana tenang, baru bicara baik-baik. 🌿",
+      sedang: "Ceritakan perasaanmu dengan jujur tapi sopan. 🌤️",
+      tinggi: "Jaga jarak sementara, minta dukungan orang dewasa. 🔴",
+    },
+    lain: {
+      rendah: "Refleksi diri dan atur ulang rutinitas kecilmu. 🌿",
+      sedang: "Ceritakan ke teman dekat agar tidak menumpuk di hati. 🌤️",
+      tinggi: "Pertimbangkan bicara dengan psikolog atau guru BK. 🔴",
+    }
+  };
+
+  if (lvl <= 2) kategori = "rendah";
+  else if (lvl <= 4) kategori = "sedang";
+  else kategori = "tinggi";
+
+  msg = solusi[reason][kategori];
+
+  const warna =
+    kategori === "rendah" ? "green" :
+    kategori === "sedang" ? "orange" : "red";
+
+  document.getElementById("sResult").innerHTML = `
+    <div style="border-left: 6px solid ${warna}; padding: 10px; border-radius: 6px; background: ${warna === "green" ? "#eafbea" : warna === "orange" ? "#fff4e6" : "#ffeaea"};">
+      <strong style="color:${warna}; text-transform:uppercase;">Tingkat Stress: ${kategori}</strong><br>
+      <span style="font-size: 1.1em;">${msg}</span>
+    </div>
+  `;
+};
+
+
+  // 🔥 Kalori Harian
+  document.getElementById("calcCalories").onclick = () => {
+    const w = Number(document.getElementById("weight").value);
+    const h = Number(document.getElementById("height").value);
+    const a = Number(document.getElementById("age").value);
+    const gender = document.getElementById("gender").value;
+    const activity = Number(document.getElementById("activity").value);
+
+    if (!w || !h || !a || !gender || !activity)
+      return alert("Lengkapi semua data kalori!");
+
+    let bmr = gender === "male"
+      ? 10 * w + 6.25 * h - 5 * a + 5
+      : 10 * w + 6.25 * h - 5 * a - 161;
+
+    const calories = Math.round(bmr * activity);
+    let note = "";
+    if (activity <= 1.2) note = "Kamu butuh lebih banyak gerak!";
+    else if (activity <= 1.55) note = "Aktivitasmu cukup seimbang.";
+    else note = "Hebat! Aktivitasmu sangat tinggi.";
+
+    document.getElementById("calResult").innerHTML =
+      `Kebutuhan kalori harianmu: <strong>${calories.toLocaleString("id-ID")} kkal</strong><br>${note}`;
+  };
+}
+
     };
   </script>
 </body>
