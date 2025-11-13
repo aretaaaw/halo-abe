@@ -183,7 +183,7 @@
                 <input id="tMapel" placeholder="Contoh: Fisika"/>
               </div>
               <div class="form-group">
-                <label>Tingkat Kesulitan</label>
+                <label>Tingkat Kesulitann</label>
                 <div class="stars" id="starRate">
                   <span data-v="1">★</span>
                   <span data-v="2">★</span>
@@ -431,7 +431,7 @@
           if(!reason || !stressLevel) return alert("Pilih alasan dan tingkat stress!");
           let msg = "";
           const lvl = Number(stressLevel);
-          if(lvl<=2) msg="Kamu baik-baik saja bang, pertahankan!";
+          if(lvl<=2) msg="Kamu baik-baik saja, pertahankan!";
           else if(lvl<=4) msg="Coba tarik napas dalam dan relaks sebentar.";
           else if(lvl<=6) msg=`Istirahat sejenak dan bicarakan masalah ${reason} dengan teman atau guru.`;
           else msg=`Segera rehat, cari bantuan profesional terkait ${reason}.`;
