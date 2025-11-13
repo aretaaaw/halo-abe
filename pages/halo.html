@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Halo, ABE — SPA</title>
+  <link rel="stylesheet" href="/public/style.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { background: #fafafa; color: #687d31; }
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #d1e8ff; box-shadow: 0 2px 6px #fff; position: fixed; top:0; width:100%; z-index:10; }
+    nav a { margin-left: 1rem; text-decoration: none; font-weight: bold; color: #687d31; }
+    main { padding: 120px 20px; max-width: 1000px; margin: 0 auto; }
+    h2, h3 { margin-bottom: 20px; }
+    .card { background: white; padding: 25px 30px; border-radius: 12px; box-shadow: 0 2px 10px #0001; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; display:flex; flex-direction:column; gap: 6px; }
+    input, select, textarea { padding: 10px; border:1px solid #ccc; border-radius: 8px; font-size: 15px; }
+    button { padding: 10px 20px; background:#222; color:white; border:none; border-radius:8px; cursor:pointer; font-size:15px; align-self:flex-start; }
+    button:hover { opacity:0.85; transition:0.3s; }
+
+    /* Checklist */
+    #checklist { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    #checklist label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+
+    /* Star rating */
+    .stars { display: flex; gap: 5px; }
+    .stars span { font-size: 28px; cursor: pointer; color: #ccc; transition: 0.2s; }
+    .stars .active { color: gold; }
+
+    /* Task list */
+    #taskList, #taskHistory { list-style: none; margin-top: 15px; display: flex; flex-direction: column; gap: 10px; padding-left: 0; }
+    #taskList li, #taskHistory li { background: white; padding: 12px 15px; border-radius: 10px; box-shadow: 0 1px 5px #0001; display: flex; align-items: center; justify-content: space-between; }
+    #taskList input[type="checkbox"] { transform: scale(1.3); cursor: pointer; }
+    #taskList li.overdue { background: #ffd4d4; border: 1px solid #ff9d9d; }
+
+    /* Calendar */
+    #calendar { margin-top: 15px; }
+    .calendar { display:grid; grid-template-columns: repeat(7, 1fr); gap:6px; margin-top:10px; }
+    .calendar div { padding:10px; background:white; border-radius:6px; box-shadow:0 1px 4px #0001; text-align:center; font-size:14px; cursor:pointer; transition:0.2s; }
+    .calendar div:hover { transform:scale(1.05); }
+    .calendar .has-task { background:#f9ffd1; font-weight:600; border:1px solid #ccc; }
+    .calendar .today { background:#c8f7c5; border:1px solid #9ac29a; }
+
+    /* Layout tugas rapi */
+    .task-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px; align-items: start; }
+    .task-left, .task-right { display: flex; flex-direction: column; gap: 20px; }
+    @media (max-width: 900px) { .task-layout { grid-template-columns: 1fr; } }
+
+    /* Home */
+    .home-hero.soft { display:flex; justify-content:space-between; align-items:stretch; width:100%; height:80vh; background:#e8f4ff; margin-top:10px; }
+    .hero-left.soft { flex:3; background:url("/public/Home.jpeg") center center/cover no-repeat; border-radius:0; display:flex; flex-direction:column; justify-content:flex-end; padding:2rem 3rem; color:white; box-shadow:2px 0 8px rgba(0,0,0,0.05); }
+    .hero-right.soft { flex:2; background:white; padding:4rem; display:flex; flex-direction:column; justify-content:flex-start; border-left:6px solid #C8F4E5; box-shadow:-2px 0 8px rgba(0,0,0,0.05); }
+    .overlay-text.soft { color:white; text-shadow:0 2px 6px rgba(0,0,0,0.5); }
+    .hero-title.soft { font-size:2.2rem; font-weight:700; margin-bottom:0.4rem; }
+    .hero-sub.soft { font-size:0.95rem; opacity:0.95; }
+    .right-title.soft { color:#2b4a42; font-size:1.6rem; margin-bottom:1rem; font-weight:700; }
+    .right-desc.soft { color:#3a4a3f; font-size:1rem; line-height:1.8; margin-bottom:1.5rem; max-width:600px; }
+    .hero-video.soft { width:140px; height:auto; align-self:center; border-radius:10px; }
+
+    /* Motivation full background */
+    .motivation-bg {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  background: url("/public/motivasi.jpeg") center center/cover no-repeat;
+  
+  /* Flexbox untuk center konten */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertikal center */
+  align-items: center;     /* Horizontal center */
+  text-align: center;
+  color: white;
+}
+
+.motivation-bg h2,
+.motivation-bg p,
+.motivation-bg button {
+  position: relative;
+  z-index: 2;
+  margin: 0.5rem 0; /* beri jarak antar elemen */
+}
+
+#shuffleBtn {
+  background: rgba(255,255,255,0.9);
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.3s;
+
+  /* Center button, sudah otomatis karena flex di parent */
+  align-self: center;
+}
+/* Finance boxes */
+  #financeResult {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+    padding-left: 0;
+  }
+
+  #financeResult li {
+    list-style: none;
+    background: #c8f4e5;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    flex: 1 1 150px; /* lebar minimal, fleksibel */
+    text-align: center;
+    font-weight: bold;
+    color: #2b4a42;
+  }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <h1 class="logo">Halo, ABE</h1>
+    <nav>
+      <a href="#/home">Home</a>
+      <a href="#/motivation">Motivation</a>
+      <a href="#/tugas">Tugas</a>
+      <a href="#/finance">Finance</a>
+      <a href="#/habit">Habit</a>
+    </nav>
+  </header>
+
+  <main id="app"></main>
+
+  <script>
+    const app = document.getElementById("app");
+    window.addEventListener("hashchange", loadPage);
+    window.addEventListener("load", loadPage);
+
+    function loadPage() {
+      const route = location.hash.replace("#/", "") || "home";
+      const pages = { home: homePage, motivation: motivationPage, tugas: tugasPage, finance: financePage, habit: habitPage };
+      app.innerHTML = pages[route] ? pages[route]() : "<h2>404 Not Found</h2>";
+      if (typeof initFunctions[route] === "function") initFunctions[route]();
+    }
+
+    function homePage() {
+      return `
+      <section class="home-hero soft">
+        <div class="hero-left soft">
+          <div class="overlay-text soft">
+            <h1 class="hero-title soft">Halo, ABE</h1>
+            <p class="hero-sub soft">Asisten Belajar</p>
+          </div>
+        </div>
+        <div class="hero-right soft">
+          <h2 class="right-title soft">Selamat datang!</h2>
+          <p class="right-desc soft">
+            Halo, ABE membantu kamu mengatur motivasi, tugas, keuangan, dan kebiasaan sehat secara efisien.
+          </p>
+          <video class="hero-video soft" src="/public/maskot.mp4" autoplay loop muted playsinline></video>
+        </div>
+      </section>`;
+    }
+
+    function motivationPage() {
+      return `
+        <section class="motivation-bg">
+          <h2>Motivation</h2>
+          <p id="motext"></p>
+          <button id="shuffleBtn">Shuffle</button>
+        </section>`;
+    }
+
+    function tugasPage() {
+      return `
+        <h2>Tugas</h2>
+        <div class="task-layout">
+          <div class="task-left">
+            <div class="card">
+              <div class="form-group">
+                <label>Nama Tugas</label>
+                <input id="tName" placeholder="Contoh: Laporan Fisika"/>
+              </div>
+              <div class="form-group">
+                <label>Deadline</label>
+                <input type="date" id="tDeadline" />
+              </div>
+              <div class="form-group">
+                <label>Mata Pelajaran</label>
+                <input id="tMapel" placeholder="Contoh: Fisika"/>
+              </div>
+              <div class="form-group">
+                <label>Tingkat Kesulitan</label>
+                <div class="stars" id="starRate">
+                  <span data-v="1">★</span>
+                  <span data-v="2">★</span>
+                  <span data-v="3">★</span>
+                  <span data-v="4">★</span>
+                  <span data-v="5">★</span>
+                </div>
+              </div>
+              <button id="addTask">Tambah Tugas</button>
+            </div>
+          </div>
+          <div class="task-right">
+            <div class="card">
+              <h3>Prioritas Tugas</h3>
+              <ul id="taskList"></ul>
+              <h3 style="margin-top:20px;">History Tugas</h3>
+              <ul id="taskHistory"></ul>
+            </div>
+            <div class="card">
+              <h3>Kalender Tugas</h3>
+              <div id="calendar"></div>
+              <p id="taskOnDate" style="margin-top:10px;font-size:14px;color:#444;"></p>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function financePage() {
+      return `
+        <h2>Finance</h2>
+        <div class="card">
+          <div class="form-group">
+            <label>Pemasukan Mingguan</label>
+            <input id="income" placeholder="Rp 0" />
+          </div>
+          <div class="form-group">
+            <label>Kebutuhan</label>
+            <div id="checklist">
+              <label><input type="checkbox" value="Uang Saku"> Uang Saku</label>
+              <label><input type="checkbox" value="Kas"> Kas</label>
+              <label><input type="checkbox" value="Sekolah"> Sekolah</label>
+              <label><input type="checkbox" value="Tabungan"> Tabungan</label>
+              <label><input type="checkbox" value="Dana Darurat"> Dana Darurat</label>
+              <label><input type="checkbox" value="Keperluan rumah"> Keperluan rumah</label>
+              <label><input type="checkbox" value="Uang makan"> Uang makan</label>
+              <label><input type="checkbox" value="Acara"> Acara</label>
+            </div>
+          </div>
+          <button id="calcFinance">Hitung</button>
+        </div>
+        <ul id="financeResult"></ul>`;
+    }
+
+    function habitPage() {
+      return `
+        <h2>Habit</h2>
+        <div class="card">
+          <h3>Stress Management</h3>
+          <div class="form-group"><label>Alasan</label><textarea id="sReason"></textarea></div>
+          <div class="form-group"><label>Tingkat Stress</label><input type="number" id="sLevel" min="1" max="10"/></div>
+          <button id="solveStress">Dapatkan Solusi</button>
+          <p id="sResult"></p>
+        </div>`;
+    }
+
+    const initFunctions = {
+      motivation() {
+        const list = [
+          "Kamu lebih kuat dari yang kamu kira.",
+          "Progres kecil tetaplah progres.",
+          "Tetap maju, jangan berhenti.",
+          "Kerja kerasmu akan terbayar.",
+          "Tidak apa-apa istirahat, asal jangan menyerah.",
+          "Setiap hari adalah kesempatan baru.",
+          " Jangan bandingkan perjalananmu dengan orang lain; setiap orang punya waktunya sendiri untuk bersinar.",
+        ];
+        const motext = document.getElementById("motext");
+        const shuffleBtn = document.getElementById("shuffleBtn");
+        const randomQuote = () => motext.innerText = list[Math.floor(Math.random() * list.length)];
+        shuffleBtn.addEventListener("click", randomQuote);
+        randomQuote();
+      },
+
+      tugas() {
+        const stars = document.querySelectorAll("#starRate span");
+        let rating = 0;
+        const tasks = [];
+        const history = [];
+
+        stars.forEach(star => {
+          star.addEventListener("click", () => {
+            rating = star.dataset.v;
+            stars.forEach(s => s.classList.toggle("active", s.dataset.v <= rating));
+          });
+        });
+
+        document.getElementById("addTask").onclick = () => {
+          const name = tName.value.trim();
+          const mapel = tMapel.value.trim();
+          const deadline = tDeadline.value;
+          if (!name || !mapel || !deadline) return alert("Lengkapi semua data tugas!");
+          tasks.push({ name, mapel, deadline, rating: Number(rating) });
+          renderTasks();
+          renderCalendar();
+
+          rating = 0;
+          stars.forEach(s => s.classList.remove("active"));
+          tName.value = ""; tMapel.value = ""; tDeadline.value = "";
+        };
+
+        function renderTasks() {
+          const today = new Date();
+          const sorted = tasks.slice().sort((a,b)=>{
+            const da = new Date(a.deadline), db = new Date(b.deadline);
+            if (da.getTime() === db.getTime()) return b.rating - a.rating;
+            return da - db;
+          });
+
+          const list = document.getElementById("taskList");
+          list.innerHTML = "";
+          sorted.forEach((t, i) => {
+            const li = document.createElement("li");
+            const d = new Date(t.deadline);
+            if (d < new Date(today.getFullYear(), today.getMonth(), today.getDate())) li.classList.add("overdue");
+            li.innerHTML = `
+              <div>
+                <input type="checkbox" data-index="${i}" />
+                <strong>${t.name}</strong> — ${t.mapel} (★${t.rating})<br><small>${t.deadline}</small>
+              </div>`;
+            list.appendChild(li);
+          });
+
+          list.querySelectorAll("input[type='checkbox']").forEach(cb=>{
+            cb.addEventListener("change", e=>{
+              if(e.target.checked){
+                const idx = e.target.dataset.index;
+                history.push(tasks[idx]);
+                tasks.splice(idx,1);
+                renderTasks();
+                renderCalendar();
+                renderHistory();
+              }
+            });
+          });
+        }
+
+        function renderHistory() {
+          const hlist = document.getElementById("taskHistory");
+          hlist.innerHTML = "";
+          if (history.length === 0) {
+            hlist.innerHTML = "<li style='color:#777;'>Belum ada tugas yang diselesaikan.</li>";
+            return;
+          }
+          history.forEach(h=>{
+            const li = document.createElement("li");
+            li.innerHTML = `<div><strong>${h.name}</strong> — ${h.mapel} (★${h.rating})<br><small>Selesai • ${h.deadline}</small></div>`;
+            hlist.appendChild(li);
+          });
+        }
+
+        function renderCalendar() {
+          const calendarEl = document.getElementById("calendar");
+          const showEl = document.getElementById("taskOnDate");
+          calendarEl.innerHTML = "";
+          showEl.textContent = "";
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = now.getMonth();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+          const today = now.getDate();
+          const grid = document.createElement("div");
+          grid.classList.add("calendar");
+
+          for (let d = 1; d <= daysInMonth; d++) {
+            const cell = document.createElement("div");
+            cell.textContent = d;
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const taskListForDate = tasks.filter(t => t.deadline === dateStr);
+            if (taskListForDate.length) cell.classList.add("has-task");
+            if (d === today) cell.classList.add("today");
+            cell.addEventListener("click",()=>{
+              if(taskListForDate.length){
+                showEl.innerHTML = `<strong>Tugas tanggal ${dateStr}:</strong><br>` +
+                  taskListForDate.map(t=>`${t.name} (${t.mapel}) ★${t.rating}`).join("<br>");
+              } else {
+                showEl.textContent = `Tidak ada tugas tanggal ${dateStr}.`;
+              }
+            });
+            grid.appendChild(cell);
+          }
+          calendarEl.appendChild(grid);
+        }
+
+        renderCalendar();
+        renderHistory();
+      },
+
+      finance() {
+        const incomeField = document.getElementById("income");
+        incomeField.addEventListener("input", () => {
+          let v = incomeField.value.replace(/[^0-9]/g, "");
+          incomeField.value = "Rp " + v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        });
+
+        document.getElementById("calcFinance").onclick = () => {
+          const raw = incomeField.value.replace(/[^0-9]/g, "");
+          const val = Number(raw);
+          const checkedNeeds = Array.from(document.querySelectorAll("#checklist input:checked")).map(cb => cb.value);
+          if (checkedNeeds.length === 0) return alert("Pilih minimal satu kebutuhan!");
+          const per = Math.floor(val / checkedNeeds.length);
+          const out = document.getElementById("financeResult");
+          out.innerHTML = "";
+          checkedNeeds.forEach(n => {
+            const li = document.createElement("li");
+            li.textContent = `${n}: Rp ${per.toLocaleString("id-ID")}`;
+            out.appendChild(li);
+          });
+        };
+      },
+
+      habit() {
+        document.getElementById("solveStress").onclick = () => {
+          const reason = document.getElementById("sReason").value.trim();
+          const level = Number(document.getElementById("sLevel").value);
+          if (!reason || !level) return alert("Isi alasan dan tingkat stress!");
+          let msg = "";
+          if (level <= 3) msg = "Kamu baik-baik saja, pertahankan!";
+          else if (level <= 6) msg = "Ambil napas dalam, istirahat sebentar.";
+          else msg = "Segera rehat, ceritakan pada teman atau guru BK.";
+          document.getElementById("sResult").textContent = msg;
+        };
+      },
+    };
+  </script>
+</body>
+</html>
