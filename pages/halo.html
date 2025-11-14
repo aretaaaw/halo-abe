@@ -360,6 +360,12 @@ button:hover {
   font-size: 1rem;
   line-height: 1.5;
 }
+/* ==== FIX AGAR GRAFIK CHART.JS MUNCUL ==== */
+#financeChart {
+  width: 100% !important;
+  height: 300px !important;
+  display: block;
+}
 
   </style>
 </head>
@@ -700,12 +706,14 @@ button:hover {
         renderHistory();
       },
 
-     finance() {
+   finance() {
   const incomeField = document.getElementById("income");
   incomeField.addEventListener("input", () => {
     let v = incomeField.value.replace(/[^0-9]/g, "");
     incomeField.value = "Rp " + v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   });
+
+  let financeChart = null; // SIMPAN grafik agar bisa dihapus & diganti
 
   document.getElementById("calcFinance").onclick = () => {
     const raw = document.getElementById("income").value.replace(/[^0-9]/g, "");
@@ -718,7 +726,6 @@ button:hover {
     if (kebutuhanDipilih.length === 0)
       return alert("Pilih minimal satu kebutuhan!");
 
-    // Bobot persen
     const bobotPersen = {
       "Uang Saku": 20,
       "Kas": 10,
@@ -730,7 +737,6 @@ button:hover {
       "Acara": 10
     };
 
-    // Hitung total bobot persen dari kebutuhan yang dipilih
     let total = 0;
     kebutuhanDipilih.forEach(k => {
       total += bobotPersen[k] || 0;
@@ -739,40 +745,38 @@ button:hover {
     if (total === 0)
       return alert("Bobot kebutuhan tidak valid!");
 
-    // Tampilkan hasil pembagian uang
     const out = document.getElementById("financeResult");
     out.innerHTML = "";
 
-    const hasilPembagian = [];
+    const labels = [];
+    const values = [];
 
     kebutuhanDipilih.forEach(k => {
       const persen = bobotPersen[k];
       const porsi = Math.round((persen / total) * uang);
 
-      hasilPembagian.push(porsi);
+      labels.push(k);
+      values.push(porsi);
 
       const li = document.createElement("li");
       li.textContent = `${k}: Rp ${porsi.toLocaleString("id-ID")}`;
       out.appendChild(li);
     });
 
-    // ============================
-    // 🔥 GRAFIK PIE CHART
-    // ============================
+    // ==== CHART ====  
     const ctx = document.getElementById("financeChart").getContext("2d");
 
-    // Hapus chart lama supaya tidak dobel
-    if (window.financeChart) {
-      window.financeChart.destroy();
+    // Hapus grafik lama
+    if (financeChart) {
+      financeChart.destroy();
     }
 
-    // Buat chart baru
-    window.financeChart = new Chart(ctx, {
-      type: "pie",
+    financeChart = new Chart(ctx, {
+      type: "doughnut",
       data: {
-        labels: kebutuhanDipilih,
+        labels: labels,
         datasets: [{
-          data: hasilPembagian
+          data: values
         }]
       },
       options: {
@@ -782,6 +786,7 @@ button:hover {
     });
   };
 },
+
 
 
  habit() {
