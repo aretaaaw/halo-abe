@@ -108,6 +108,259 @@
       font-weight: bold;
       color: #2b4a42;
     }
+
+    /* --- HABIT PAGE RE-DESIGN --- */
+
+/* Judul Habit */
+#app h2 {
+  color: #2b4a42;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* Card Habit lebih elegan */
+.habit-card {
+  background: linear-gradient(to bottom right, #ffffff, #f3f9ff);
+  padding: 25px;
+  border-radius: 18px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  border: 1px solid #e6effb;
+  margin-bottom: 30px;
+  transition: 0.3s;
+}
+
+.habit-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Label input */
+.habit-card label {
+  font-weight: 600;
+  color: #2d493f;
+}
+
+/* Dropdown & input */
+.habit-card select,
+.habit-card input {
+  border-radius: 10px;
+  border: 1px solid #cbd9e9;
+  background: #f8fbff;
+}
+
+/* Button Habit */
+.habit-card button {
+  padding: 10px 20px;
+  background: #3a6f54;
+  border-radius: 10px;
+  font-size: 15px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.25s;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+.habit-card button:hover {
+  background: #2e5a45;
+  transform: translateY(-2px);
+}
+
+/* Stars styling */
+#stressStars span {
+  font-size: 32px;
+  padding: 3px;
+  transition: 0.2s;
+}
+
+#stressStars span:hover {
+  transform: scale(1.2);
+}
+
+/* Result box animation */
+#sResult div,
+#calResult {
+  animation: fadeIn 0.35s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Extra spacing */
+.habit-section {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+/* === GLOBAL UPGRADE === */
+body {
+  background: #f4f7fb;
+  color: #333;
+  font-family: 'Poppins', Arial, sans-serif;
+}
+
+/* Navbar upgrade */
+.navbar {
+  background: #ffffff;
+  border-bottom: 1px solid #e3e8ee;
+  padding: 1rem 3rem;
+  backdrop-filter: blur(8px);
+}
+
+nav a {
+  color: #2b4a42;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: 0.25s;
+}
+
+nav a:hover {
+  background: #e1f5ff;
+  color: #1f3b34;
+}
+
+/* === CARD UPGRADE === */
+.card, .habit-card {
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+  border: 1px solid #e8edf5;
+}
+
+/* Input & Select upgrade */
+input, select, textarea {
+  background: #f9fbff;
+  border-radius: 10px;
+  transition: 0.25s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #89c5ff;
+  outline: none;
+  box-shadow: 0 0 6px rgba(90,153,255,0.4);
+}
+
+/* Button upgrade */
+button {
+  background: linear-gradient(to right, #3a6f54, #2d5643);
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  transition: 0.25s;
+}
+
+button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+/* === HOME HERO UPGRADE === */
+.home-hero.soft {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.hero-right.soft {
+  border-left: none;
+  border-radius: 0 20px 20px 0;
+}
+
+.hero-left.soft {
+  border-radius: 20px 0 0 20px;
+}
+
+/* Right side text */
+.right-title.soft {
+  font-size: 1.9rem;
+}
+
+.right-desc.soft {
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+/* === MOTIVATION UPGRADE === */
+.motivation-bg {
+  background-blend-mode: multiply;
+  background-color: rgba(0,0,0,0.2);
+}
+
+#shuffleBtn {
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 14px 30px;
+  backdrop-filter: blur(4px);
+}
+
+/* === TUGAS UPGRADE === */
+.task-layout {
+  gap: 40px;
+}
+
+#taskList li, #taskHistory li {
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border-left: 6px solid #c8e6c9;
+}
+
+#taskList li.overdue {
+  border-left: 6px solid #ff7272;
+  background: #ffe5e5;
+}
+
+/* Calendar upgrade */
+.calendar div {
+  border-radius: 10px;
+  font-size: 15px;
+  padding: 12px 0;
+}
+.calendar .has-task {
+  background: #fff7c8;
+}
+.calendar .today {
+  background: #d7f9d7;
+  font-weight: bold;
+}
+
+/* === FINANCE UPGRADE === */
+#financeResult li {
+  border-radius: 14px;
+  background: linear-gradient(to bottom right, #d9f8ef, #c8f4e5);
+  font-size: 1rem;
+  padding: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+}
+
+/* === HABIT PAGE UPGRADE === */
+.habit-card {
+  border-radius: 20px;
+}
+
+#stressStars span {
+  font-size: 34px;
+  margin-right: 4px;
+  transition: 0.2s;
+}
+
+#stressStars span:hover {
+  transform: scale(1.25);
+}
+
+/* Result box */
+#sResult div {
+  border-radius: 12px !important;
+  padding: 14px !important;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
   </style>
 </head>
 <body>
@@ -123,6 +376,8 @@
   </header>
 
   <main id="app"></main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
     const app = document.getElementById("app");
@@ -234,14 +489,19 @@
           </div>
           <button id="calcFinance">Hitung</button>
         </div>
-        <ul id="financeResult"></ul>`;
+        <ul id="financeResult"></ul>
+        <div class="card" style="margin-top:20px;">
+      <h3>Grafik Pembagian Uang</h3>
+      <canvas id="financeChart"></canvas>
+    </div>
+        `;
     }
 
  function habitPage() {
   return `
     <h2>Habit</h2>
 
-    <div class="card">
+    <div class="habit-card">
       <h3>Stress Management</h3>
       <div class="form-group">
         <label>Alasan Stress</label>
@@ -269,7 +529,7 @@
       <p id="sResult"></p>
     </div>
 
-    <div class="card">
+    <div class="habit-card">
       <h3>Kalori Harian</h3>
       <div class="form-group">
         <label>Berat Badan (kg)</label>
@@ -440,28 +700,89 @@
         renderHistory();
       },
 
-      finance() {
-        const incomeField = document.getElementById("income");
-        incomeField.addEventListener("input", () => {
-          let v = incomeField.value.replace(/[^0-9]/g, "");
-          incomeField.value = "Rp " + v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        });
+     finance() {
+  const incomeField = document.getElementById("income");
+  incomeField.addEventListener("input", () => {
+    let v = incomeField.value.replace(/[^0-9]/g, "");
+    incomeField.value = "Rp " + v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  });
 
-        document.getElementById("calcFinance").onclick = () => {
-          const raw = incomeField.value.replace(/[^0-9]/g, "");
-          const val = Number(raw);
-          const checkedNeeds = Array.from(document.querySelectorAll("#checklist input:checked")).map(cb => cb.value);
-          if (checkedNeeds.length === 0) return alert("Pilih minimal satu kebutuhan!");
-          const per = Math.floor(val / checkedNeeds.length);
-          const out = document.getElementById("financeResult");
-          out.innerHTML = "";
-          checkedNeeds.forEach(n => {
-            const li = document.createElement("li");
-            li.textContent = `${n}: Rp ${per.toLocaleString("id-ID")}`;
-            out.appendChild(li);
-          });
-        };
+  document.getElementById("calcFinance").onclick = () => {
+    const raw = document.getElementById("income").value.replace(/[^0-9]/g, "");
+    const uang = Number(raw);
+
+    const kebutuhanDipilih = Array.from(
+      document.querySelectorAll("#checklist input:checked")
+    ).map(cb => cb.value);
+
+    if (kebutuhanDipilih.length === 0)
+      return alert("Pilih minimal satu kebutuhan!");
+
+    // Bobot persen
+    const bobotPersen = {
+      "Uang Saku": 20,
+      "Kas": 10,
+      "Sekolah": 25,
+      "Tabungan": 25,
+      "Dana Darurat": 10,
+      "Keperluan rumah": 15,
+      "Uang makan": 20,
+      "Acara": 10
+    };
+
+    // Hitung total bobot persen dari kebutuhan yang dipilih
+    let total = 0;
+    kebutuhanDipilih.forEach(k => {
+      total += bobotPersen[k] || 0;
+    });
+
+    if (total === 0)
+      return alert("Bobot kebutuhan tidak valid!");
+
+    // Tampilkan hasil pembagian uang
+    const out = document.getElementById("financeResult");
+    out.innerHTML = "";
+
+    const hasilPembagian = [];
+
+    kebutuhanDipilih.forEach(k => {
+      const persen = bobotPersen[k];
+      const porsi = Math.round((persen / total) * uang);
+
+      hasilPembagian.push(porsi);
+
+      const li = document.createElement("li");
+      li.textContent = `${k}: Rp ${porsi.toLocaleString("id-ID")}`;
+      out.appendChild(li);
+    });
+
+    // ============================
+    // 🔥 GRAFIK PIE CHART
+    // ============================
+    const ctx = document.getElementById("financeChart").getContext("2d");
+
+    // Hapus chart lama supaya tidak dobel
+    if (window.financeChart) {
+      window.financeChart.destroy();
+    }
+
+    // Buat chart baru
+    window.financeChart = new Chart(ctx, {
+      type: "pie",
+      data: {
+        labels: kebutuhanDipilih,
+        datasets: [{
+          data: hasilPembagian
+        }]
       },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  };
+},
+
 
  habit() {
   // ⭐ Stress Management
