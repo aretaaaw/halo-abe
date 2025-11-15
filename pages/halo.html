@@ -366,6 +366,62 @@ button:hover {
   height: 300px !important;
   display: block;
 }
+/* === SLIDER GALLERY UNTUK TUGAS === */
+.task-slider {
+  margin-top: 20px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 14px;
+  position: relative;
+}
+
+.task-slider-track {
+  display: flex;
+  gap: 10px;
+  transition: transform 0.4s ease;
+}
+
+.task-slider img {
+  width: 100%;
+  max-width: 260px;
+  border-radius: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.slider-btn:hover { background: #eef7ff; }
+
+.habit-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.habit-table th, 
+.habit-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.habit-table th {
+  background: #4a90e2;
+  color: white;
+}
+
+#resetHabitTable {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: #e95656;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
   </style>
 </head>
@@ -455,6 +511,15 @@ button:hover {
               </div>
               <button id="addTask">Tambah Tugas</button>
             </div>
+            <div class="task-slider">
+  <div class="task-slider-track" id="taskSliderTrack">
+    <img src="/public/tugas1.jpeg" />
+    <img src="/public/tugas2.jpeg" />
+    <img src="/public/tugas3.jpeg" />
+    <img src="/public/tugas4.jpeg" />
+  </div>
+</div>
+
           </div>
           <div class="task-right">
             <div class="card">
@@ -571,6 +636,44 @@ button:hover {
       <button id="calcCalories">Hitung Kalori</button>
       <p id="calResult"></p>
     </div>
+    <!-- 🔵 Tabel Aktivitas Harian -->
+<div class="habit-box">
+  <h3>📅 Aktivitas Harian</h3>
+
+  <table class="habit-table">
+    <thead>
+      <tr>
+        <th>Kegiatan</th>
+        <th>Pagi</th>
+        <th>Siang</th>
+        <th>Malam</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Minum Air</td>
+        <td><input type="checkbox" class="hab water-morning"></td>
+        <td><input type="checkbox" class="hab water-noon"></td>
+        <td><input type="checkbox" class="hab water-night"></td>
+      </tr>
+      <tr>
+        <td>Makan</td>
+        <td><input type="checkbox" class="hab eat-morning"></td>
+        <td><input type="checkbox" class="hab eat-noon"></td>
+        <td><input type="checkbox" class="hab eat-night"></td>
+      </tr>
+      <tr>
+        <td>Tidur</td>
+        <td>-</td>
+        <td>-</td>
+        <td><input type="checkbox" class="hab sleep-night"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button id="resetHabitTable">Reset Checklist Hari Ini</button>
+</div>
+
   `;
 }
 
@@ -704,6 +807,33 @@ button:hover {
 
         renderCalendar();
         renderHistory();
+      // ==== SLIDER INFINITE LOOP SUPER SMOOTH ====
+const track = document.getElementById("taskSliderTrack");
+const slideWidth = 270; // lebar tiap gambar
+let index = 0;
+
+// Clone slide pertama → taruh di akhir
+const firstClone = track.children[0].cloneNode(true);
+track.appendChild(firstClone);
+
+function moveSlider() {
+  index++;
+  track.style.transition = "transform 0.6s ease";
+  track.style.transform = `translateX(-${index * slideWidth}px)`;
+
+  // Jika masuk slide clone → reset ke awal tanpa transisi
+  if (index === track.children.length - 1) {
+    setTimeout(() => {
+      track.style.transition = "none";       // matikan transisi
+      track.style.transform = `translateX(0)`; 
+      index = 0;                              // reset index
+    }, 600); // tunggu sampai transisi selesai
+  }
+}
+
+setInterval(moveSlider, 2600);
+
+
       },
 
    finance() {
@@ -883,6 +1013,38 @@ button:hover {
     document.getElementById("calResult").innerHTML =
       `Kebutuhan kalori harianmu: <strong>${calories.toLocaleString("id-ID")} kkal</strong><br>${note}`;
   };
+  // 🔵 RESET CHECKLIST
+document.getElementById("resetHabitTable").onclick = () => {
+  document.querySelectorAll(".hab").forEach(cb => cb.checked = false);
+  alert("Checklist harian direset!");
+};
+
+// 🔵 SIMPAN CHECKLIST SECARA LOKAL
+function saveHabitTable() {
+  const data = {};
+  document.querySelectorAll(".hab").forEach((cb, i) => {
+    data[i] = cb.checked;
+  });
+  localStorage.setItem("habitDaily", JSON.stringify(data));
+}
+
+// 🔵 LOAD ULANG DATA CHECKLIST
+function loadHabitTable() {
+  const data = JSON.parse(localStorage.getItem("habitDaily") || "{}");
+  const boxes = document.querySelectorAll(".hab");
+  boxes.forEach((cb, i) => {
+    if (data[i]) cb.checked = true;
+  });
+}
+
+// Simpan otomatis tiap dicentang
+document.querySelectorAll(".hab").forEach(cb => {
+  cb.addEventListener("change", saveHabitTable);
+});
+
+// Load saat habit() dipanggil
+loadHabitTable();
+
 }
 
     };
