@@ -1,10 +1,19 @@
 const backendURL = "http://localhost:3001";
 
-// =======================================
-// REGISTER
-// =======================================
-const registerForm = document.getElementById("registerForm");
+// =======================
+// CEK USER LOGIN OTOMATIS
+// =======================
+const currentUser = JSON.parse(localStorage.getItem("user"));
+if (currentUser) {
+  if (window.location.pathname.includes("login.html") || window.location.pathname.includes("register.html")) {
+    window.location.href = "/pages/index.html";
+  }
+}
 
+// =======================
+// REGISTER
+// =======================
+const registerForm = document.getElementById("registerForm");
 if (registerForm) {
   registerForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -13,35 +22,41 @@ if (registerForm) {
     const email    = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    const res = await fetch(backendURL + "/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, email, password }),
-    });
-
-    const data = await res.json();
-
     const msg = document.getElementById("message");
 
-    if (data.error) {
-      msg.innerText = data.error;
-      msg.style.color = "red";
-    } else {
-      msg.innerText = "Registrasi berhasil! Mengalihkan ke halaman login...";
-      msg.style.color = "green";
+    try {
+      const res = await fetch(`${backendURL}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
+      });
 
-      setTimeout(() => {
-        window.location.href = "login.html";
-      }, 1500);
+      const data = await res.json();
+      console.log("Frontend register response:", data);
+
+      if (res.status !== 200) {
+        msg.innerText = data.error || "Gagal mendaftar";
+        msg.style.color = "red";
+      } else {
+        // Simpan user di localStorage agar langsung login
+        localStorage.setItem("user", JSON.stringify(data.data));
+        msg.innerText = "Registrasi berhasil! Mengalihkan ke dashboard...";
+        msg.style.color = "green";
+
+        setTimeout(() => window.location.href = "/pages/index.html", 1500);
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+      msg.innerText = "Terjadi kesalahan koneksi";
+      msg.style.color = "red";
     }
   });
 }
 
-// =======================================
+// =======================
 // LOGIN
-// =======================================
+// =======================
 const loginForm = document.getElementById("loginForm");
-
 if (loginForm) {
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -49,29 +64,43 @@ if (loginForm) {
     const email    = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    const res = await fetch(backendURL + "/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await res.json();
-
     const msg = document.getElementById("message");
 
-    if (data.error) {
-      msg.innerText = data.error;
+    try {
+      const res = await fetch(`${backendURL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      console.log("Frontend login response:", data);
+
+      if (res.status !== 200) {
+        msg.innerText = data.error || "Gagal login";
+        msg.style.color = "red";
+      } else {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        msg.innerText = "Login berhasil! Mengalihkan ke dashboard...";
+        msg.style.color = "green";
+
+        setTimeout(() => window.location.href = "/pages/index.html", 1500);
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+      msg.innerText = "Terjadi kesalahan koneksi";
       msg.style.color = "red";
-    } else {
-      msg.innerText = "Login berhasil! Masuk ke dashboard...";
-      msg.style.color = "green";
-
-      // simpan user di localStorage (biar bisa dipakai di halaman lain)
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      setTimeout(() => {
-        window.location.href = "/pages/index.html"; // Ubah sesuai home kamu
-      }, 1500);
     }
+  });
+}
+
+// =======================
+// LOGOUT (opsional di index.html)
+// =======================
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("user");
+    window.location.href = "login.html";
   });
 }
