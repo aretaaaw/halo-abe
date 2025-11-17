@@ -285,18 +285,6 @@ button:hover {
   line-height: 1.7;
 }
 
-/* === MOTIVATION UPGRADE === */
-.motivation-bg {
-  background-blend-mode: multiply;
-  background-color: rgba(0,0,0,0.2);
-}
-
-#shuffleBtn {
-  font-weight: 600;
-  border-radius: 12px;
-  padding: 14px 30px;
-  backdrop-filter: blur(4px);
-}
 
 /* === TUGAS UPGRADE === */
 .task-layout {
@@ -408,7 +396,7 @@ button:hover {
 }
 
 .habit-table th {
-  background: #4a90e2;
+  background: #3a6f54;
   color: white;
 }
 
@@ -421,6 +409,91 @@ button:hover {
   color: white;
   border-radius: 8px;
   cursor: pointer;
+}
+
+/* === MOTIVATION SECTION — CLEAN & CENTERED === */
+.motivation-bg {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  background: url("/public/motivasi.jpeg") center center/cover no-repeat;
+  background-color: rgba(0,0,0,0.25);
+  background-blend-mode: multiply;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+  color: white;
+  padding: 0 20px;
+}
+
+.motivation-bg h2 {
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+}
+
+.motivation-bg p {
+  max-width: 500px;
+  font-size: 1.2rem;
+  line-height: 1.4;
+  margin-bottom: 1.8rem;
+}
+
+#shuffleBtn {
+  background: rgba(255,255,255,0.9);
+  color: #427444;
+  padding: 15px 20px;     /* padding kecil */
+  border: none;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(3px);
+  transition: 0.2s ease;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+
+  max-width: 90px;       /* ⬅ MENDEFINISIKAN BATAS PANJANG */
+  width: auto;
+  text-align: center;
+}
+
+
+
+/* === FINANCE CLEAN === */
+#financeResult {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 15px;
+  padding-left: 0;
+}
+
+#financeResult li {
+  list-style: none;
+  flex: 1 1 150px;
+  padding: 18px;
+  text-align: center;
+  font-weight: bold;
+  color: #2b4a42;
+  background: linear-gradient(to bottom right, #d9f8ef, #c8f4e5);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+  transition: 0.25s;
+}
+
+#financeResult li:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+/* Chart box */
+#financeChart {
+  width: 100% !important;
+  height: 300px !important;
+  display: block;
 }
 
   </style>

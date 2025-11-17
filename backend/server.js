@@ -1,73 +1,55 @@
 const express = require("express");
 const cors = require("cors");
 const { createClient } = require("@supabase/supabase-js");
-const bcrypt = require("bcryptjs");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: false
+}));
 app.use(express.json());
+app.use(express.static("../pages"));
+app.use(express.static("../public"));
 
 const supabaseUrl = "https://anyylsedulbqhtsxteej.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFueXlsc2VkdWxicWh0c3h0ZWVqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzI1NDA2NCwiZXhwIjoyMDc4ODMwMDY0fQ.V_3FdZZpsfmXTSsxbROgXHk499XbnQQvB-tSg_VzbbI"; // gunakan service role key di backend
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFueXlsc2VkdWxicWh0c3h0ZWVqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzI1NDA2NCwiZXhwIjoyMDc4ODMwMDY0fQ.V_3FdZZpsfmXTSsxbROgXHk499XbnQQvB-tSg_VzbbI"; // backend gunakan service role
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// REGISTER
-app.post("/register", async (req, res) => {
-  console.log("Register request body:", req.body);
-  const { username, email, password } = req.body;
+// --------------------
+// USER PROFILE INSERT
+// --------------------
+app.post("/save-profile", async (req, res) => {
+  const { id, username } = req.body;
 
-  if (!username || !email || !password)
-    return res.status(400).json({ error: "Semua field harus diisi" });
+  if (!id || !username)
+    return res.status(400).json({ error: "Data tidak lengkap" });
 
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
+  const { data, error } = await supabase
+    .from("profiles")
+    .insert([{ id, username }])
+    .select();
 
-    // pakai service key, RLS tidak akan mencegah insert
-    const { data, error } = await supabase
-      .from("users")
-      .insert([{ username, email, password: hashedPassword }])
-      .select();
+  if (error) return res.status(500).json({ error });
 
-    console.log("Insert result:", data, error);
-
-    if (error) return res.status(500).json({ error: JSON.stringify(error) });
-
-    res.json({ message: "Registrasi berhasil!", data: data[0] });
-  } catch (err) {
-    console.error("Server error:", err);
-    res.status(500).json({ error: "Terjadi kesalahan server" });
-  }
+  res.json({ message: "Profile saved!", data });
 });
 
-// LOGIN
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+// --------------------
+// GET PROFILE
+// --------------------
+app.get("/profile/:id", async (req, res) => {
+  const { id } = req.params;
 
-  if (!email || !password) return res.status(400).json({ error: "Email dan password harus diisi" });
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", id)
+    .single();
 
-  try {
-    const { data: users, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("email", email)
-      .limit(1);
+  if (error) return res.status(500).json({ error });
 
-    if (error) return res.status(500).json({ error: JSON.stringify(error) });
-    if (!users || users.length === 0) return res.status(400).json({ error: "Email tidak terdaftar" });
-
-    const user = users[0];
-    const match = await bcrypt.compare(password, user.password);
-
-    if (!match) return res.status(400).json({ error: "Password salah" });
-
-    res.json({
-      message: "Login berhasil!",
-      user: { id: user.id, username: user.username, email: user.email },
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Terjadi kesalahan server" });
-  }
+  res.json(data);
 });
 
-app.listen(3001, () => console.log("Backend berjalan di http://localhost:3001"));
+app.listen(8080, () => console.log("Backend berjalan di http://localhost:8080"));
