@@ -14,18 +14,22 @@
     h2, h3 { margin-bottom: 20px; }
     .card { background: white; padding: 25px 30px; border-radius: 12px; box-shadow: 0 2px 10px #0001; margin-bottom: 25px; }
     .form-group { margin-bottom: 15px; display:flex; flex-direction:column; gap: 6px; }
-    input, select, textarea { padding: 10px; border:1px solid #ccc; border-radius: 8px; font-size: 15px; }
-    button { padding: 10px 20px; background:#222; color:white; border:none; border-radius:8px; cursor:pointer; font-size:15px; align-self:flex-start; }
-    button:hover { opacity:0.85; transition:0.3s; }
+    .form-group label { font-weight: 600; color: #2b4a42; font-size: 14px; }
+    input, select, textarea { padding: 12px 14px; border:1.5px solid #d0d0d0; border-radius: 8px; font-size: 15px; background: #fafbfc; transition: all 0.3s ease; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #42a870; background: #ffffff; box-shadow: 0 0 8px rgba(66,168,112,0.2); }
+    button { padding: 10px 20px; background:#42a870; color:white; border:none; border-radius:8px; cursor:pointer; font-size:15px; align-self:flex-start; transition: all 0.3s ease; font-weight: 600; }
+    button:hover { background: #359961; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(66,168,112,0.3); }
+    button:active { transform: translateY(0); }
 
     /* Checklist */
     #checklist { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
     #checklist label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 
     /* Star rating */
-    .stars { display: flex; gap: 5px; }
-    .stars span { font-size: 28px; cursor: pointer; color: #ccc; transition: 0.2s; }
-    .stars .active { color: gold; }
+    .stars { display: flex; gap: 8px; justify-content: flex-start; }
+    .stars span { font-size: 32px; cursor: pointer; color: #ddd; transition: all 0.2s ease; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+    .stars span:hover { color: #ffc107; transform: scale(1.2) rotate(15deg); }
+    .stars .active { color: #ffc107; filter: drop-shadow(0 3px 8px rgba(255,193,7,0.4)); transform: scale(1.15); }
 
     /* Task list */
     #taskList, #taskHistory { list-style: none; margin-top: 15px; display: flex; flex-direction: column; gap: 10px; padding-left: 0; }
@@ -291,16 +295,68 @@ button:hover {
   gap: 40px;
 }
 
-#taskList li, #taskHistory li {
-  border-radius: 14px;
-  padding: 16px 18px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  border-left: 6px solid #c8e6c9;
+.task-left .card {
+  border: 2px solid #e0e0e0;
+  background: #fafbfc;
+}
+
+.task-left .card h3 {
+  color: #2b4a42;
+  margin-bottom: 15px;
+}
+
+#taskList {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+#taskList li {
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-left: 5px solid #42a870;
+  background: linear-gradient(to right, #f0fdf4, #ffffff);
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+#taskList li:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transform: translateX(4px);
 }
 
 #taskList li.overdue {
-  border-left: 6px solid #ff7272;
-  background: #ffe5e5;
+  border-left: 5px solid #ff6b6b;
+  background: linear-gradient(to right, #ffe5e5, #ffffff);
+}
+
+#taskList li.overdue:hover {
+  box-shadow: 0 4px 12px rgba(255,107,107,0.2);
+}
+
+#taskHistory {
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 10px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 12px;
+  margin-top: 15px;
+}
+
+#taskHistory li {
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  border-left: 4px solid #b3e5fc;
+  background: linear-gradient(to right, #e1f5fe, #ffffff);
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #555;
 }
 
 /* Calendar upgrade */
@@ -431,15 +487,22 @@ button:hover {
 }
 
 .motivation-bg h2 {
-  font-size: 2.2rem;
+  font-size: 2.8rem;
   margin-bottom: 1rem;
+  font-weight: 700;
+  text-shadow: 0 4px 15px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.5);
+  color: #fff;
+  letter-spacing: 1px;
 }
 
 .motivation-bg p {
   max-width: 500px;
-  font-size: 1.2rem;
-  line-height: 1.4;
+  font-size: 1.3rem;
+  line-height: 1.6;
   margin-bottom: 1.8rem;
+  text-shadow: 0 3px 12px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.4);
+  color: #fff;
+  font-weight: 500;
 }
 
 #shuffleBtn {
@@ -836,6 +899,8 @@ button:hover {
       tugas() {
         const stars = document.querySelectorAll("#starRate span");
         let rating = 0;
+        const tasks = [];
+        const history = [];
 
         stars.forEach(star => {
           star.addEventListener("click", () => {
@@ -844,85 +909,60 @@ button:hover {
           });
         });
 
-        // Load existing tasks when page loads
-        loadTasks();
-
-        // Submit new task
-        document.getElementById("addTask").onclick = async () => {
-          const name = document.getElementById("tName").value.trim();
-          const mapel = document.getElementById("tMapel").value.trim();
-          const deadline = document.getElementById("tDeadline").value;
-          
-          if (!name || !mapel || !deadline) {
-            return alert("Lengkapi semua data tugas!");
+        // Load existing tasks from API
+        async function loadTasksFromDB() {
+          try {
+            const res = await fetch('/api/tugas', { credentials: 'include' });
+            if (res.ok) {
+              const data = await res.json();
+              tasks.length = 0;
+              tasks.push(...(data.tasks || []));
+              history.length = 0;
+              history.push(...(data.completed || []));
+              renderTasks();
+              renderCalendar();
+              renderHistory();
+            }
+          } catch (err) {
+            console.error('Error loading tasks:', err);
           }
+        }
+
+        document.getElementById("addTask").onclick = async () => {
+          const name = tName.value.trim();
+          const mapel = tMapel.value.trim();
+          const deadline = tDeadline.value;
+          if (!name || !mapel || !deadline) return alert("Lengkapi semua data tugas!");
           
           try {
             const res = await fetch('/api/tugas', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
-              body: JSON.stringify({
-                name,
-                mapel,
-                deadline,
-                rating: Number(rating)
-              })
+              body: JSON.stringify({ name, mapel, deadline, rating: Number(rating) })
             });
             
-            if (!res.ok) {
-              const err = await res.json();
-              return alert('Error: ' + (err.error || 'Gagal menambah tugas'));
+            if (res.ok) {
+              const data = await res.json();
+              tasks.push(data.task);
+              renderTasks();
+              renderCalendar();
+              
+              rating = 0;
+              stars.forEach(s => s.classList.remove("active"));
+              tName.value = ""; tMapel.value = ""; tDeadline.value = "";
+            } else {
+              alert("Error menambahkan tugas");
             }
-            
-            const data = await res.json();
-            console.log('✓ Task created:', data.task);
-            
-            // Reset form
-            rating = 0;
-            stars.forEach(s => s.classList.remove("active"));
-            document.getElementById("tName").value = "";
-            document.getElementById("tMapel").value = "";
-            document.getElementById("tDeadline").value = "";
-            
-            // Reload tasks
-            loadTasks();
-            alert('Tugas berhasil ditambahkan!');
           } catch (err) {
             console.error('Error adding task:', err);
-            alert('Error: ' + err.message);
+            alert("Error menambahkan tugas");
           }
         };
 
-        async function loadTasks() {
-          try {
-            const res = await fetch('/api/tugas', {
-              credentials: 'include',
-              headers: {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-              }
-            });
-            
-            if (!res.ok) {
-              console.error('Failed to load tasks:', res.status);
-              return;
-            }
-            
-            const data = await res.json();
-            console.log('Tasks loaded:', data);
-            
-            renderTasks(data.pending);
-            renderHistory(data.completed);
-            renderCalendar(data.pending);
-          } catch (err) {
-            console.error('Error loading tasks:', err);
-          }
-        }
-
-        function renderTasks(pendingTasks = []) {
+        function renderTasks() {
           const today = new Date();
-          const sorted = pendingTasks.slice().sort((a,b)=>{
+          const sorted = tasks.slice().sort((a,b)=>{
             const da = new Date(a.deadline), db = new Date(b.deadline);
             if (da.getTime() === db.getTime()) return b.rating - a.rating;
             return da - db;
@@ -930,66 +970,52 @@ button:hover {
 
           const list = document.getElementById("taskList");
           list.innerHTML = "";
-          
-          if (sorted.length === 0) {
-            list.innerHTML = "<li style='color:#777;'>Tidak ada tugas pending.</li>";
-            return;
-          }
-          
-          sorted.forEach((t) => {
+          sorted.forEach((t, i) => {
             const li = document.createElement("li");
             const d = new Date(t.deadline);
-            const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-            if (d < todayDate) li.classList.add("overdue");
-            
-            li.innerHTML = `<div style="flex:1;">
+            if (d < new Date(today.getFullYear(), today.getMonth(), today.getDate())) li.classList.add("overdue");
+            li.innerHTML = `<div>
+              <input type="checkbox" data-taskid="${t.id}" />
               <strong>${t.name}</strong> — ${t.mapel} (★${t.rating})<br><small>${t.deadline}</small>
-            </div>
-            <div style="display:flex; gap:8px;">
-              <input type="checkbox" data-taskid="${t.id}" class="taskCheckbox" />
-              <button class="task-delete" data-taskid="${t.id}" style="background:#e95656; padding:4px 8px; font-size:12px;">Hapus</button>
             </div>`;
             list.appendChild(li);
           });
 
-          // Mark task as completed
-          list.querySelectorAll(".taskCheckbox").forEach(cb=>{
-            cb.addEventListener("change", async (e) => {
+          list.querySelectorAll("input[type='checkbox']").forEach(cb=>{
+            cb.addEventListener("change", async (e)=>{
               if(e.target.checked){
                 const taskId = e.target.dataset.taskid;
-                await completeTask(taskId);
-              }
-            });
-          });
-          
-          // Delete task
-          list.querySelectorAll(".task-delete").forEach(btn => {
-            btn.addEventListener("click", async (e) => {
-              const taskId = e.target.dataset.taskid;
-              if (confirm("Hapus tugas ini?")) {
-                await deleteTask(taskId);
+                try {
+                  const res = await fetch(`/api/tugas/${taskId}/complete`, {
+                    method: 'POST',
+                    credentials: 'include'
+                  });
+                  if (res.ok) {
+                    await loadTasksFromDB();
+                  }
+                } catch (err) {
+                  console.error('Error completing task:', err);
+                }
               }
             });
           });
         }
 
-        function renderHistory(completedTasks = []) {
+        function renderHistory() {
           const hlist = document.getElementById("taskHistory");
           hlist.innerHTML = "";
-          
-          if (completedTasks.length === 0) {
+          if (history.length === 0) {
             hlist.innerHTML = "<li style='color:#777;'>Belum ada tugas yang diselesaikan.</li>";
             return;
           }
-          
-          completedTasks.forEach(h=>{
+          history.forEach(h=>{
             const li = document.createElement("li");
             li.innerHTML = `<div><strong>${h.name}</strong> — ${h.mapel} (★${h.rating})<br><small>Selesai • ${h.deadline}</small></div>`;
             hlist.appendChild(li);
           });
         }
 
-        function renderCalendar(pendingTasks = []) {
+        function renderCalendar() {
           const calendarEl = document.getElementById("calendar");
           const showEl = document.getElementById("taskOnDate");
           calendarEl.innerHTML = "";
@@ -1006,7 +1032,7 @@ button:hover {
             const cell = document.createElement("div");
             cell.textContent = d;
             const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            const taskListForDate = pendingTasks.filter(t => t.deadline === dateStr);
+            const taskListForDate = tasks.filter(t => t.deadline === dateStr);
             if (taskListForDate.length) cell.classList.add("has-task");
             if (d === today) cell.classList.add("today");
             cell.addEventListener("click",()=>{
@@ -1022,41 +1048,7 @@ button:hover {
           calendarEl.appendChild(grid);
         }
 
-        async function completeTask(taskId) {
-          try {
-            const res = await fetch(`/api/tugas/${taskId}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({ status: 'completed' })
-            });
-            
-            if (res.ok) {
-              console.log('✓ Task completed:', taskId);
-              loadTasks();
-            }
-          } catch (err) {
-            console.error('Error completing task:', err);
-          }
-        }
-
-        async function deleteTask(taskId) {
-          try {
-            const res = await fetch(`/api/tugas/${taskId}`, {
-              method: 'DELETE',
-              credentials: 'include'
-            });
-            
-            if (res.ok) {
-              console.log('✓ Task deleted:', taskId);
-              loadTasks();
-            }
-          } catch (err) {
-            console.error('Error deleting task:', err);
-          }
-        }
-
-        renderCalendar();
+        loadTasksFromDB();
       // ==== SLIDER INFINITE LOOP SUPER SMOOTH ====
 const track = document.getElementById("taskSliderTrack");
 const slideWidth = 270; // lebar tiap gambar
