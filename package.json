@@ -2,22 +2,26 @@
   "name": "halo-abe",
   "version": "1.0.0",
   "description": "Halo, ABE - Student Learning Assistant",
-  "main": "api/index.js",
+  "main": "backend/server-simple.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node backend/server-simple.js",
     "dev": "node backend/server-simple.js",
     "setup": "cd backend && npm install && cd ..",
-    "setup:dev": "cd backend && npm install && cd .. && npm run dev",
-    "build": "echo 'Build complete'",
-    "vercel-build": "echo 'Ready for Vercel'"
+    "setup:dev": "cd backend && npm install && cd .. && npm run dev"
   },
   "keywords": ["education", "learning", "student"],
   "author": "Halo ABE Team",
   "license": "MIT",
-  "type": "module",
+  "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "mongodb": "^7.0.0"
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "express-session": "^1.17.3",
+    "dotenv": "^16.3.1",
+    "mongodb": "^7.0.0",
+    "mongoose": "^7.5.0",
+    "connect-mongo": "^5.0.0"
   },
   "engines": {
     "node": "20.x"
