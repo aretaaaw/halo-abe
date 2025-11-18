@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Auth Test</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    .pass { background: #efe; color: green; }
+    .fail { background: #fee; color: red; }
+    button { padding: 8px 15px; margin: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Auth Flow Test</h1>
+  
+  <div class="test">
+    <h3>1. Test Register</h3>
+    <input id="regUsername" placeholder="Username" />
+    <input id="regPassword" type="password" placeholder="Password" />
+    <button onclick="testRegister()">Register</button>
+    <div id="regResult"></div>
+  </div>
+
+  <div class="test">
+    <h3>2. Test Login</h3>
+    <input id="logUsername" placeholder="Username" />
+    <input id="logPassword" type="password" placeholder="Password" />
+    <button onclick="testLogin()">Login</button>
+    <div id="logResult"></div>
+  </div>
+
+  <div class="test">
+    <h3>3. Test Access Halo Page</h3>
+    <button onclick="testHaloPage()">Access /pages/halo.html</button>
+    <div id="haloResult"></div>
+  </div>
+
+  <div class="test">
+    <h3>4. Test Get Current User</h3>
+    <button onclick="testMe()">Get /api/me</button>
+    <div id="meResult"></div>
+  </div>
+
+  <script>
+    async function testRegister() {
+      const res = document.getElementById('regResult');
+      const username = document.getElementById('regUsername').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+      
+      if (!username || !password) {
+        res.innerHTML = '<p class="fail">Username dan password harus diisi</p>';
+        return;
+      }
+
+      try {
+        const r = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ username, password })
+        });
+        const data = await r.json();
+        if (r.ok) {
+          res.innerHTML = `<p class="pass">✓ Register berhasil! User: ${data.user.username}</p>`;
+        } else {
+          res.innerHTML = `<p class="fail">✗ Register gagal: ${data.error}</p>`;
+        }
+      } catch (err) {
+        res.innerHTML = `<p class="fail">✗ Error: ${err.message}</p>`;
+      }
+    }
+
+    async function testLogin() {
+      const res = document.getElementById('logResult');
+      const username = document.getElementById('logUsername').value.trim();
+      const password = document.getElementById('logPassword').value.trim();
+      
+      if (!username || !password) {
+        res.innerHTML = '<p class="fail">Username dan password harus diisi</p>';
+        return;
+      }
+
+      try {
+        const r = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ username, password })
+        });
+        const data = await r.json();
+        if (r.ok) {
+          res.innerHTML = `<p class="pass">✓ Login berhasil! User: ${data.user.username}</p>`;
+        } else {
+          res.innerHTML = `<p class="fail">✗ Login gagal: ${data.error}</p>`;
+        }
+      } catch (err) {
+        res.innerHTML = `<p class="fail">✗ Error: ${err.message}</p>`;
+      }
+    }
+
+    async function testHaloPage() {
+      const res = document.getElementById('haloResult');
+      try {
+        const r = await fetch('/pages/halo.html', { credentials: 'include' });
+        if (r.ok) {
+          res.innerHTML = `<p class="pass">✓ /pages/halo.html accessible (${r.status})</p>`;
+        } else {
+          res.innerHTML = `<p class="fail">✗ /pages/halo.html error: ${r.status}</p>`;
+        }
+      } catch (err) {
+        res.innerHTML = `<p class="fail">✗ Error: ${err.message}</p>`;
+      }
+    }
+
+    async function testMe() {
+      const res = document.getElementById('meResult');
+      try {
+        const r = await fetch('/api/me', { credentials: 'include' });
+        const data = await r.json();
+        if (r.ok) {
+          res.innerHTML = `<p class="pass">✓ Current user: ${data.username} (ID: ${data.id})</p>`;
+        } else {
+          res.innerHTML = `<p class="fail">✗ Not authenticated</p>`;
+        }
+      } catch (err) {
+        res.innerHTML = `<p class="fail">✗ Error: ${err.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>

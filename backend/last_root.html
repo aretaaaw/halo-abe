@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Halo, ABE — SPA</title>
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/public/style.css" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
     body { background: #fafafa; color: #687d31; }
@@ -48,7 +48,7 @@
 
     /* Home */
     .home-hero.soft { display:flex; justify-content:space-between; align-items:stretch; width:100%; height:80vh; background:#e8f4ff; margin-top:10px; }
-    .hero-left.soft { flex:3; background:url("/Home.jpeg") center center/cover no-repeat; border-radius:0; display:flex; flex-direction:column; justify-content:flex-end; padding:2rem 3rem; color:white; box-shadow:2px 0 8px rgba(0,0,0,0.05); }
+    .hero-left.soft { flex:3; background:url("/public/Home.jpeg") center center/cover no-repeat; border-radius:0; display:flex; flex-direction:column; justify-content:flex-end; padding:2rem 3rem; color:white; box-shadow:2px 0 8px rgba(0,0,0,0.05); }
     .hero-right.soft { flex:2; background:white; padding:4rem; display:flex; flex-direction:column; justify-content:flex-start; border-left:6px solid #C8F4E5; box-shadow:-2px 0 8px rgba(0,0,0,0.05); }
     .overlay-text.soft { color:white; text-shadow:0 2px 6px rgba(0,0,0,0.5); }
     .hero-title.soft { font-size:2.2rem; font-weight:700; margin-bottom:0.4rem; }
@@ -62,7 +62,7 @@
       position: relative;
       height: 100vh;
       width: 100%;
-      background: url("/motivasi.jpeg") center center/cover no-repeat;
+      background: url("/public/motivasi.jpeg") center center/cover no-repeat;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -416,7 +416,7 @@ button:hover {
   position: relative;
   height: 100vh;
   width: 100%;
-  background: url("/motivasi.jpeg") center center/cover no-repeat;
+  background: url("/public/motivasi.jpeg") center center/cover no-repeat;
   background-color: rgba(0,0,0,0.25);
   background-blend-mode: multiply;
 
@@ -507,8 +507,6 @@ button:hover {
       <a href="#/tugas">Tugas</a>
       <a href="#/finance">Finance</a>
       <a href="#/habit">Habit</a>
-      <span id="userInfo" style="margin-left: auto; color: #2b4a42; font-size: 14px; margin-right: 20px;"></span>
-      <button id="logoutBtn" style="background: #e95656; padding: 8px 16px; cursor: pointer; border: none; border-radius: 6px; color: white; font-weight: 600;">Logout</button>
     </nav>
   </header>
 
@@ -517,42 +515,6 @@ button:hover {
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
-    // ===== CHECK SESSION ON PAGE LOAD =====
-    window.addEventListener('load', async () => {
-      try {
-        const res = await fetch('/api/me', { credentials: 'include' });
-        const data = await res.json();
-        
-        if (!res.ok) {
-          // Not authenticated — redirect to login
-          window.location.href = '/login/login.html';
-          return;
-        }
-        
-        // Show username
-        document.getElementById('userInfo').textContent = `👤 ${data.username}`;
-        
-      } catch (err) {
-        console.error('Auth check error:', err);
-        window.location.href = '/login/login.html';
-      }
-    });
-
-    // ===== LOGOUT HANDLER =====
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      try {
-        const res = await fetch('/api/logout', {
-          method: 'POST',
-          credentials: 'include'
-        });
-        if (res.ok) {
-          window.location.href = '/login/login.html';
-        }
-      } catch (err) {
-        console.error('Logout error:', err);
-      }
-    });
-
     const app = document.getElementById("app");
     window.addEventListener("hashchange", loadPage);
     window.addEventListener("load", loadPage);
@@ -578,7 +540,7 @@ button:hover {
           <p class="right-desc soft">
             Halo, ABE membantu kamu mengatur motivasi, tugas, keuangan, dan kebiasaan sehat secara efisien.
           </p>
-          <video class="hero-video soft" src="/maskot.mp4" autoplay loop muted playsinline></video>
+          <video class="hero-video soft" src="/public/maskot.mp4" autoplay loop muted playsinline></video>
         </div>
       </section>`;
     }
@@ -624,10 +586,10 @@ button:hover {
             </div>
             <div class="task-slider">
   <div class="task-slider-track" id="taskSliderTrack">
-    <img src="/tugas1.jpeg" />
-    <img src="/tugas2.jpeg" />
-    <img src="/tugas3.jpeg" />
-    <img src="/tugas4.jpeg" />
+    <img src="/public/tugas1.jpeg" />
+    <img src="/public/tugas2.jpeg" />
+    <img src="/public/tugas3.jpeg" />
+    <img src="/public/tugas4.jpeg" />
   </div>
 </div>
 
@@ -1162,3 +1124,4 @@ loadHabitTable();
   </script>
 </body>
 </html>
+
