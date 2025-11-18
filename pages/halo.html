@@ -518,25 +518,51 @@ button:hover {
 
   <script>
     // ===== CHECK SESSION ON PAGE LOAD =====
-    window.addEventListener('load', async () => {
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    async function checkAuth() {
       try {
-        const res = await fetch('/api/me', { credentials: 'include' });
+        console.log('[Auth Check] Attempt', retryCount + 1);
+        const res = await fetch('/api/me', { 
+          credentials: 'include',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
         const data = await res.json();
         
+        console.log('[Auth Check] Response status:', res.status);
+        console.log('[Auth Check] Data:', data);
+        
         if (!res.ok) {
+          console.warn('[Auth Check] Not authenticated (status ' + res.status + ')');
           // Not authenticated — redirect to login
           window.location.href = '/login/login.html';
           return;
         }
         
         // Show username
+        console.log('[Auth Check] Success! User:', data.username);
         document.getElementById('userInfo').textContent = `👤 ${data.username}`;
         
       } catch (err) {
-        console.error('Auth check error:', err);
-        window.location.href = '/login/login.html';
+        console.error('[Auth Check] Error:', err);
+        
+        // Retry logic for network errors
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log('[Auth Check] Retrying in 500ms...');
+          setTimeout(checkAuth, 500);
+        } else {
+          console.error('[Auth Check] Max retries reached, redirecting to login');
+          window.location.href = '/login/login.html';
+        }
       }
-    });
+    }
+    
+    window.addEventListener('load', checkAuth);
 
     // ===== LOGOUT HANDLER =====
     document.getElementById('logoutBtn').addEventListener('click', async () => {

@@ -1,20 +1,25 @@
 {
-  "name": "halo",
+  "name": "halo-abe",
   "version": "1.0.0",
-  "description": "",
-  "main": "App.js",
+  "description": "Halo, ABE - Student Learning Assistant",
+  "main": "api/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "node backend/server-simple.js",
+    "setup": "cd backend && npm install && cd ..",
+    "setup:dev": "cd backend && npm install && cd .. && npm run dev",
+    "build": "echo 'Build complete'",
+    "vercel-build": "echo 'Ready for Vercel'"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "keywords": ["education", "learning", "student"],
+  "author": "Halo ABE Team",
+  "license": "MIT",
+  "type": "module",
   "dependencies": {
-    "@supabase/supabase-js": "^2.81.1",
     "bcryptjs": "^3.0.3",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
     "mongodb": "^7.0.0"
+  },
+  "engines": {
+    "node": "20.x"
   }
 }

@@ -9,11 +9,16 @@ const bcrypt = require('bcryptjs');
 const users = new Map();
 
 const app = express();
+
+// Trust proxy for session cookies
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: "http://localhost:8080",
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
-  allowedHeaders: ["Content-Type"]
+  allowedHeaders: ["Content-Type"],
+  maxAge: 86400
 }));
 app.use(express.json());
 
@@ -22,26 +27,35 @@ const sessionSecret = process.env.SESSION_SECRET || 'dev_secret_key_change_in_pr
 app.use(session({
   secret: sessionSecret,
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true, // CHANGED: true to ensure session created immediately
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24 * 14,
+    maxAge: 1000 * 60 * 60 * 24 * 14, // 14 days
     httpOnly: true,
-    secure: false,
-    sameSite: 'lax', // allow cookie to be sent on top-level navigations
-    path: '/'
+    secure: false, // localhost tidak perlu https
+    sameSite: 'lax',
+    path: '/',
+    domain: undefined // let browser auto-detect
   }
 }));
 
 // ===== Request Logger =====
 app.use((req, res, next) => {
   const sid = req.session && req.session.userId ? String(req.session.userId).slice(0,6) : '-';
-  console.log(new Date().toISOString(), req.method, req.path, 'sessionId=', sid);
+  console.log(new Date().toISOString(), req.method, req.path, 'sessionId=', sid, 'cookie=' + (req.headers.cookie ? 'YES' : 'NO'));
   next();
 });
 
 // ===== Serve Static Assets BEFORE Auth =====
 app.use(express.static(path.resolve(__dirname, '..', 'public')));
 app.use('/login', express.static(path.resolve(__dirname, '..', 'login')));
+
+// Don't cache pages - always check auth
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
 
 // Protect pages under /pages — require authentication to view
 const pagesDir = path.resolve(__dirname, '..', 'pages');
@@ -82,8 +96,11 @@ app.post('/api/register', async (req, res) => {
     req.session.userId = userId;
     console.log('✓ User registered:', username, 'ID:', userId);
     
-    req.session.save(err => {
-      if (err) console.error('Session save error on register:', err);
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error on register:', err);
+        return res.status(500).json({ error: 'session error' });
+      }
       res.json({ 
         message: 'registered', 
         user: { id: userId, username } 
@@ -110,8 +127,11 @@ app.post('/api/login', async (req, res) => {
     req.session.userId = user.userId;
     console.log('✓ User logged in:', username, 'ID:', user.userId);
     
-    req.session.save(err => {
-      if (err) console.error('Session save error on login:', err);
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error on login:', err);
+        return res.status(500).json({ error: 'session error' });
+      }
       res.json({ message: 'logged in', user: { id: user.userId, username: user.username } });
     });
   } catch (err) {
@@ -131,12 +151,21 @@ app.post('/api/logout', (req, res) => {
 
 // ===== API: Get Current User =====
 app.get('/api/me', (req, res) => {
-  if (!req.session || !req.session.userId) return res.status(401).json({ error: 'not authenticated' });
+  console.log('[/api/me] Session check - userId:', req.session?.userId || 'NONE');
+  
+  if (!req.session || !req.session.userId) {
+    console.log('[/api/me] Not authenticated - no userId in session');
+    return res.status(401).json({ error: 'not authenticated' });
+  }
+  
   for (const user of users.values()) {
     if (user.userId === req.session.userId) {
+      console.log('[/api/me] User found:', user.username);
       return res.json({ id: user.userId, username: user.username, createdAt: user.createdAt });
     }
   }
+  
+  console.log('[/api/me] User not found in database');
   res.status(404).json({ error: 'user not found' });
 });
 
