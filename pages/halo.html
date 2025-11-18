@@ -836,8 +836,6 @@ button:hover {
       tugas() {
         const stars = document.querySelectorAll("#starRate span");
         let rating = 0;
-        const tasks = [];
-        const history = [];
 
         stars.forEach(star => {
           star.addEventListener("click", () => {
@@ -846,23 +844,85 @@ button:hover {
           });
         });
 
-        document.getElementById("addTask").onclick = () => {
-          const name = tName.value.trim();
-          const mapel = tMapel.value.trim();
-          const deadline = tDeadline.value;
-          if (!name || !mapel || !deadline) return alert("Lengkapi semua data tugas!");
-          tasks.push({ name, mapel, deadline, rating: Number(rating) });
-          renderTasks();
-          renderCalendar();
+        // Load existing tasks when page loads
+        loadTasks();
 
-          rating = 0;
-          stars.forEach(s => s.classList.remove("active"));
-          tName.value = ""; tMapel.value = ""; tDeadline.value = "";
+        // Submit new task
+        document.getElementById("addTask").onclick = async () => {
+          const name = document.getElementById("tName").value.trim();
+          const mapel = document.getElementById("tMapel").value.trim();
+          const deadline = document.getElementById("tDeadline").value;
+          
+          if (!name || !mapel || !deadline) {
+            return alert("Lengkapi semua data tugas!");
+          }
+          
+          try {
+            const res = await fetch('/api/tugas', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                name,
+                mapel,
+                deadline,
+                rating: Number(rating)
+              })
+            });
+            
+            if (!res.ok) {
+              const err = await res.json();
+              return alert('Error: ' + (err.error || 'Gagal menambah tugas'));
+            }
+            
+            const data = await res.json();
+            console.log('✓ Task created:', data.task);
+            
+            // Reset form
+            rating = 0;
+            stars.forEach(s => s.classList.remove("active"));
+            document.getElementById("tName").value = "";
+            document.getElementById("tMapel").value = "";
+            document.getElementById("tDeadline").value = "";
+            
+            // Reload tasks
+            loadTasks();
+            alert('Tugas berhasil ditambahkan!');
+          } catch (err) {
+            console.error('Error adding task:', err);
+            alert('Error: ' + err.message);
+          }
         };
 
-        function renderTasks() {
+        async function loadTasks() {
+          try {
+            const res = await fetch('/api/tugas', {
+              credentials: 'include',
+              headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+              }
+            });
+            
+            if (!res.ok) {
+              console.error('Failed to load tasks:', res.status);
+              return;
+            }
+            
+            const data = await res.json();
+            console.log('Tasks loaded:', data);
+            
+            renderTasks(data.pending);
+            renderHistory(data.completed);
+            renderCalendar(data.pending);
+          } catch (err) {
+            console.error('Error loading tasks:', err);
+          }
+        }
+
+        function renderTasks(pendingTasks = []) {
           const today = new Date();
-          const sorted = tasks.slice().sort((a,b)=>{
+          const sorted = pendingTasks.slice().sort((a,b)=>{
             const da = new Date(a.deadline), db = new Date(b.deadline);
             if (da.getTime() === db.getTime()) return b.rating - a.rating;
             return da - db;
@@ -870,46 +930,66 @@ button:hover {
 
           const list = document.getElementById("taskList");
           list.innerHTML = "";
-          sorted.forEach((t, i) => {
+          
+          if (sorted.length === 0) {
+            list.innerHTML = "<li style='color:#777;'>Tidak ada tugas pending.</li>";
+            return;
+          }
+          
+          sorted.forEach((t) => {
             const li = document.createElement("li");
             const d = new Date(t.deadline);
-            if (d < new Date(today.getFullYear(), today.getMonth(), today.getDate())) li.classList.add("overdue");
-            li.innerHTML = `<div>
-              <input type="checkbox" data-index="${i}" />
+            const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            if (d < todayDate) li.classList.add("overdue");
+            
+            li.innerHTML = `<div style="flex:1;">
               <strong>${t.name}</strong> — ${t.mapel} (★${t.rating})<br><small>${t.deadline}</small>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <input type="checkbox" data-taskid="${t.id}" class="taskCheckbox" />
+              <button class="task-delete" data-taskid="${t.id}" style="background:#e95656; padding:4px 8px; font-size:12px;">Hapus</button>
             </div>`;
             list.appendChild(li);
           });
 
-          list.querySelectorAll("input[type='checkbox']").forEach(cb=>{
-            cb.addEventListener("change", e=>{
+          // Mark task as completed
+          list.querySelectorAll(".taskCheckbox").forEach(cb=>{
+            cb.addEventListener("change", async (e) => {
               if(e.target.checked){
-                const idx = e.target.dataset.index;
-                history.push(tasks[idx]);
-                tasks.splice(idx,1);
-                renderTasks();
-                renderCalendar();
-                renderHistory();
+                const taskId = e.target.dataset.taskid;
+                await completeTask(taskId);
+              }
+            });
+          });
+          
+          // Delete task
+          list.querySelectorAll(".task-delete").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+              const taskId = e.target.dataset.taskid;
+              if (confirm("Hapus tugas ini?")) {
+                await deleteTask(taskId);
               }
             });
           });
         }
 
-        function renderHistory() {
+        function renderHistory(completedTasks = []) {
           const hlist = document.getElementById("taskHistory");
           hlist.innerHTML = "";
-          if (history.length === 0) {
+          
+          if (completedTasks.length === 0) {
             hlist.innerHTML = "<li style='color:#777;'>Belum ada tugas yang diselesaikan.</li>";
             return;
           }
-          history.forEach(h=>{
+          
+          completedTasks.forEach(h=>{
             const li = document.createElement("li");
             li.innerHTML = `<div><strong>${h.name}</strong> — ${h.mapel} (★${h.rating})<br><small>Selesai • ${h.deadline}</small></div>`;
             hlist.appendChild(li);
           });
         }
 
-        function renderCalendar() {
+        function renderCalendar(pendingTasks = []) {
           const calendarEl = document.getElementById("calendar");
           const showEl = document.getElementById("taskOnDate");
           calendarEl.innerHTML = "";
@@ -926,7 +1006,7 @@ button:hover {
             const cell = document.createElement("div");
             cell.textContent = d;
             const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            const taskListForDate = tasks.filter(t => t.deadline === dateStr);
+            const taskListForDate = pendingTasks.filter(t => t.deadline === dateStr);
             if (taskListForDate.length) cell.classList.add("has-task");
             if (d === today) cell.classList.add("today");
             cell.addEventListener("click",()=>{
@@ -942,8 +1022,41 @@ button:hover {
           calendarEl.appendChild(grid);
         }
 
+        async function completeTask(taskId) {
+          try {
+            const res = await fetch(`/api/tugas/${taskId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ status: 'completed' })
+            });
+            
+            if (res.ok) {
+              console.log('✓ Task completed:', taskId);
+              loadTasks();
+            }
+          } catch (err) {
+            console.error('Error completing task:', err);
+          }
+        }
+
+        async function deleteTask(taskId) {
+          try {
+            const res = await fetch(`/api/tugas/${taskId}`, {
+              method: 'DELETE',
+              credentials: 'include'
+            });
+            
+            if (res.ok) {
+              console.log('✓ Task deleted:', taskId);
+              loadTasks();
+            }
+          } catch (err) {
+            console.error('Error deleting task:', err);
+          }
+        }
+
         renderCalendar();
-        renderHistory();
       // ==== SLIDER INFINITE LOOP SUPER SMOOTH ====
 const track = document.getElementById("taskSliderTrack");
 const slideWidth = 270; // lebar tiap gambar

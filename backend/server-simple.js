@@ -8,6 +8,10 @@ const bcrypt = require('bcryptjs');
 // ===== Simplified User Store (in-memory for now) =====
 const users = new Map();
 
+// ===== Task Storage (in-memory for now - per user) =====
+// Structure: Map<userId, Array<taskObjects>>
+const tasks = new Map();
+
 const app = express();
 
 // Trust proxy for session cookies
@@ -167,6 +171,130 @@ app.get('/api/me', (req, res) => {
   
   console.log('[/api/me] User not found in database');
   res.status(404).json({ error: 'user not found' });
+});
+
+// ===== Middleware: Require Authentication =====
+function requireAuth(req, res, next) {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: 'not authenticated' });
+  }
+  next();
+}
+
+// ===== API: Submit Tugas (Create) =====
+app.post('/api/tugas', requireAuth, (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { name, mapel, deadline, rating } = req.body;
+    
+    if (!name || !mapel || !deadline) {
+      return res.status(400).json({ error: 'name, mapel, deadline required' });
+    }
+    
+    // Initialize user's task array if not exists
+    if (!tasks.has(userId)) {
+      tasks.set(userId, []);
+    }
+    
+    // Create task object
+    const task = {
+      id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+      name,
+      mapel,
+      deadline,
+      rating: Number(rating) || 0,
+      status: 'pending', // pending atau completed
+      createdAt: new Date(),
+      completedAt: null
+    };
+    
+    // Store task for user
+    tasks.get(userId).push(task);
+    
+    console.log('✓ Task created:', name, 'for user:', userId);
+    res.status(201).json({ message: 'task created', task });
+  } catch (err) {
+    console.error('❌ Create task error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== API: Get Tugas History (Read) =====
+app.get('/api/tugas', requireAuth, (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const userTasks = tasks.get(userId) || [];
+    
+    // Separate pending and completed tasks
+    const pending = userTasks.filter(t => t.status === 'pending');
+    const completed = userTasks.filter(t => t.status === 'completed');
+    
+    // Sort by deadline
+    pending.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+    
+    console.log('[GET /api/tugas] User:', userId, 'Pending:', pending.length, 'Completed:', completed.length);
+    
+    res.json({
+      pending,
+      completed,
+      total: userTasks.length
+    });
+  } catch (err) {
+    console.error('❌ Get tasks error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== API: Mark Tugas as Completed (Update) =====
+app.put('/api/tugas/:taskId', requireAuth, (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { taskId } = req.params;
+    
+    const userTasks = tasks.get(userId);
+    if (!userTasks) {
+      return res.status(404).json({ error: 'no tasks found' });
+    }
+    
+    const task = userTasks.find(t => t.id === taskId);
+    if (!task) {
+      return res.status(404).json({ error: 'task not found' });
+    }
+    
+    task.status = 'completed';
+    task.completedAt = new Date();
+    
+    console.log('✓ Task completed:', task.name, 'for user:', userId);
+    res.json({ message: 'task completed', task });
+  } catch (err) {
+    console.error('❌ Update task error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== API: Delete Tugas =====
+app.delete('/api/tugas/:taskId', requireAuth, (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { taskId } = req.params;
+    
+    const userTasks = tasks.get(userId);
+    if (!userTasks) {
+      return res.status(404).json({ error: 'no tasks found' });
+    }
+    
+    const idx = userTasks.findIndex(t => t.id === taskId);
+    if (idx === -1) {
+      return res.status(404).json({ error: 'task not found' });
+    }
+    
+    const removed = userTasks.splice(idx, 1)[0];
+    console.log('✓ Task deleted:', removed.name, 'for user:', userId);
+    res.json({ message: 'task deleted' });
+  } catch (err) {
+    console.error('❌ Delete task error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ===== Redirect root to home (protected, will show login if not authed) =====
