@@ -7,10 +7,7 @@ const bcrypt = require('bcryptjs');
 
 // ===== Simplified User Store (in-memory for now) =====
 const users = new Map();
-
-// ===== Task Storage (in-memory for now - per user) =====
-// Structure: Map<userId, Array<taskObjects>>
-const tasks = new Map();
+const taskDB = new Map(); // Store: userId -> { tasks: [], completed: [] }
 
 const app = express();
 
@@ -173,128 +170,92 @@ app.get('/api/me', (req, res) => {
   res.status(404).json({ error: 'user not found' });
 });
 
-// ===== Middleware: Require Authentication =====
-function requireAuth(req, res, next) {
+// ===== API: Add Task =====
+app.post('/api/tugas', (req, res) => {
   if (!req.session || !req.session.userId) {
     return res.status(401).json({ error: 'not authenticated' });
   }
-  next();
-}
-
-// ===== API: Submit Tugas (Create) =====
-app.post('/api/tugas', requireAuth, (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const { name, mapel, deadline, rating } = req.body;
-    
-    if (!name || !mapel || !deadline) {
-      return res.status(400).json({ error: 'name, mapel, deadline required' });
-    }
-    
-    // Initialize user's task array if not exists
-    if (!tasks.has(userId)) {
-      tasks.set(userId, []);
-    }
-    
-    // Create task object
-    const task = {
-      id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-      name,
-      mapel,
-      deadline,
-      rating: Number(rating) || 0,
-      status: 'pending', // pending atau completed
-      createdAt: new Date(),
-      completedAt: null
-    };
-    
-    // Store task for user
-    tasks.get(userId).push(task);
-    
-    console.log('✓ Task created:', name, 'for user:', userId);
-    res.status(201).json({ message: 'task created', task });
-  } catch (err) {
-    console.error('❌ Create task error:', err.message);
-    res.status(500).json({ error: err.message });
+  
+  const userId = req.session.userId;
+  const { name, mapel, deadline, rating } = req.body;
+  
+  if (!name || !mapel || !deadline) {
+    return res.status(400).json({ error: 'name, mapel, deadline required' });
   }
+  
+  // Initialize user's task data if not exist
+  if (!taskDB.has(userId)) {
+    taskDB.set(userId, { tasks: [], completed: [] });
+  }
+  
+  const userTasks = taskDB.get(userId);
+  const taskId = 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+  
+  const task = {
+    id: taskId,
+    name,
+    mapel,
+    deadline,
+    rating: Number(rating) || 0,
+    createdAt: new Date().toISOString()
+  };
+  
+  userTasks.tasks.push(task);
+  console.log('✓ Task added for user', userId, ':', name);
+  
+  res.json({ 
+    message: 'task added', 
+    task 
+  });
 });
 
-// ===== API: Get Tugas History (Read) =====
-app.get('/api/tugas', requireAuth, (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const userTasks = tasks.get(userId) || [];
-    
-    // Separate pending and completed tasks
-    const pending = userTasks.filter(t => t.status === 'pending');
-    const completed = userTasks.filter(t => t.status === 'completed');
-    
-    // Sort by deadline
-    pending.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-    
-    console.log('[GET /api/tugas] User:', userId, 'Pending:', pending.length, 'Completed:', completed.length);
-    
-    res.json({
-      pending,
-      completed,
-      total: userTasks.length
-    });
-  } catch (err) {
-    console.error('❌ Get tasks error:', err.message);
-    res.status(500).json({ error: err.message });
+// ===== API: Get User Tasks =====
+app.get('/api/tugas', (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: 'not authenticated' });
   }
+  
+  const userId = req.session.userId;
+  const userTasks = taskDB.get(userId) || { tasks: [], completed: [] };
+  
+  res.json({
+    tasks: userTasks.tasks,
+    completed: userTasks.completed
+  });
 });
 
-// ===== API: Mark Tugas as Completed (Update) =====
-app.put('/api/tugas/:taskId', requireAuth, (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const { taskId } = req.params;
-    
-    const userTasks = tasks.get(userId);
-    if (!userTasks) {
-      return res.status(404).json({ error: 'no tasks found' });
-    }
-    
-    const task = userTasks.find(t => t.id === taskId);
-    if (!task) {
-      return res.status(404).json({ error: 'task not found' });
-    }
-    
-    task.status = 'completed';
-    task.completedAt = new Date();
-    
-    console.log('✓ Task completed:', task.name, 'for user:', userId);
-    res.json({ message: 'task completed', task });
-  } catch (err) {
-    console.error('❌ Update task error:', err.message);
-    res.status(500).json({ error: err.message });
+// ===== API: Complete Task =====
+app.post('/api/tugas/:taskId/complete', (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: 'not authenticated' });
   }
-});
-
-// ===== API: Delete Tugas =====
-app.delete('/api/tugas/:taskId', requireAuth, (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const { taskId } = req.params;
-    
-    const userTasks = tasks.get(userId);
-    if (!userTasks) {
-      return res.status(404).json({ error: 'no tasks found' });
-    }
-    
-    const idx = userTasks.findIndex(t => t.id === taskId);
-    if (idx === -1) {
-      return res.status(404).json({ error: 'task not found' });
-    }
-    
-    const removed = userTasks.splice(idx, 1)[0];
-    console.log('✓ Task deleted:', removed.name, 'for user:', userId);
-    res.json({ message: 'task deleted' });
-  } catch (err) {
-    console.error('❌ Delete task error:', err.message);
-    res.status(500).json({ error: err.message });
+  
+  const userId = req.session.userId;
+  const taskId = req.params.taskId;
+  
+  if (!taskDB.has(userId)) {
+    return res.status(404).json({ error: 'tasks not found' });
   }
+  
+  const userTasks = taskDB.get(userId);
+  const taskIndex = userTasks.tasks.findIndex(t => t.id === taskId);
+  
+  if (taskIndex === -1) {
+    return res.status(404).json({ error: 'task not found' });
+  }
+  
+  const completedTask = userTasks.tasks[taskIndex];
+  completedTask.completedAt = new Date().toISOString();
+  
+  userTasks.tasks.splice(taskIndex, 1);
+  userTasks.completed.push(completedTask);
+  
+  console.log('✓ Task completed:', completedTask.name);
+  
+  res.json({ 
+    message: 'task completed',
+    task: completedTask
+  });
 });
 
 // ===== Redirect root to home (protected, will show login if not authed) =====
