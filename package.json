@@ -1,20 +1,26 @@
 {
-  "name": "halo",
+  "name": "halo-abe",
   "version": "1.0.0",
-  "description": "",
-  "main": "App.js",
+  "description": "Halo, ABE - Student Learning Assistant",
+  "main": "backend/server-simple.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node backend/server-simple.js",
+    "dev": "node backend/server-simple.js",
+    "setup": "cd backend && npm install && cd ..",
+    "setup:dev": "cd backend && npm install && cd .. && npm run dev"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["education", "learning", "student"],
+  "author": "Halo ABE Team",
+  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
-    "@supabase/supabase-js": "^2.81.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "mongodb": "^7.0.0"
+    "express-session": "^1.17.3",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": "20.x"
   }
 }
